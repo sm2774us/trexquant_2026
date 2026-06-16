@@ -4,6 +4,27 @@
 > **Purpose:** Demonstrate that every Trexquant responsibility is work already executed in production at Balyasny — with specificity, conviction, and depth.
 
 ---
+---
+
+---
+---
+
+## 📑 Table of Contents
+
+**[🏗️ Context: How Balyasny Systematic Is Structured](#️-context-how-balyasny-systematic-is-structured)**
+**[✅ JD Requirement → Balyasny Proof Point](#-jd-requirement--balyasny-proof-point)**
+  - [📌 Responsibility 1 - **Machine Learning & Asset Prediction**](#-responsibility-1)
+  - [📌 Responsibility 2 - **Data Parsing & Alpha Signal Generation**](#-responsibility-2)
+  - [📌 Responsibility 3 - **Academic Research & Implementation**](#-responsibility-3)
+  - [📌 Responsibility 4 - **Model Innovation & Scalability**](#-responsibility-4)
+  - [📌 Responsibility 5 - **Team Collaboration & Strategy Backtesting**](#-responsibility-5)
+- **[📋 Requirements Checklist](#-requirements-checklist)**
+- **[💬 Closing Statement for the Trexquant Interview Panel](#-closing-statement-for-the-trexquant-interview-panel)**
+
+[🔝 Back to Top](#-table-of-contents)
+
+---
+---
 
 ## 🏗️ Context: How Balyasny Systematic Is Structured
 
@@ -29,9 +50,13 @@ I sit on the **Macro Proprietary Book** — developing systematic investment mod
 
 This is not a narrow pod. It is a research environment that **demands signals be defensible at every layer** — statistical, economic, and execution.
 
+[🔝 Back to Top](#-table-of-contents)
+
 ---
 
 ## ✅ JD Requirement → Balyasny Proof Point
+
+[🔝 Back to Top](#-table-of-contents)
 
 ---
 
@@ -53,6 +78,8 @@ At Balyasny, I designed and implemented a **multi-model ensemble architecture** 
 - **Hidden Markov Models (HMM) for Regime-Conditional Optimization:** Rather than running a single global ML model, I used a 3-state HMM (Risk-On / Risk-Off / Transition) trained on VIX, cross-asset correlation, and credit spread dynamics to route signal weights dynamically. In Risk-Off regimes, trend models received higher allocation; in Risk-On, carry and value signals dominated. This conditional weighting was the single largest contributor to live Sharpe stability across the 2025 vol regime shifts.
 
 **Optimization layer:** I implemented signal-level and portfolio-level optimization iteratively — not as a one-time calibration. Every quarter, I ran a full out-of-sample attribution decomposition (signal IC, IC-IR, decay half-life) and updated model weights accordingly. Models that showed IC decay below the 40th percentile of their historical distribution were either recalibrated or retired.
+
+[🔝 Back to Top](#-table-of-contents)
 
 ---
 
@@ -83,6 +110,8 @@ I identified a lead-lag relationship between moves in the front-month WTI Crude 
 
 One of Balyasny Systematic's mandates is alpha-capture replication of discretionary PMs — systematically extracting the *implicit rules* from observed PM behavior. I contributed to this by reverse-engineering position change patterns from a macro discretionary PM's book, identifying that their sizing behavior exhibited a strong regime-conditional signal: they consistently added to trend positions exactly when the 20-day realized vol dropped below its 6-month median. I formalized this as an explicit rule-based signal that could be run with disciplined risk controls — effectively converting an implicit PM heuristic into a transparent, testable, systematic strategy. This is precisely the kind of dataset parsing and alpha identification work that Trexquant's model is built around.
 
+[🔝 Back to Top](#-table-of-contents)
+
 ---
 
 ### 📌 Responsibility 3
@@ -105,6 +134,8 @@ I maintain an active, structured research reading practice — not passive consu
 - **Deflated Sharpe Ratio (Bailey & López de Prado, 2014):** Applied DSR as the standard gating metric for all new signals before they could enter the ensemble. This directly addressed the multiple testing problem inherent in a large signal library — a signal with a raw Sharpe of 1.2 across 50 tested variants is far less impressive than the DSR-adjusted figure. Enforcing DSR as a hard gate eliminated several candidate signals that would otherwise have passed traditional Sharpe thresholds.
 
 - **Combinatorial Purged Cross-Validation (López de Prado, 2018):** Implemented CPCV as the firm standard for all backtesting within my signal development workflow. Generated the full distribution of backtested Sharpe ratios across combinatorially constructed path subsets, enabling a statistically honest comparison of signal performance under different realized market paths — not just the single "best" backtest path.
+
+[🔝 Back to Top](#-table-of-contents)
 
 ---
 
@@ -142,6 +173,8 @@ I replaced a legacy linear ridge regression ensemble weighting scheme with a **s
 
 Every model I build is required to run within the Central Risk Book's latency and memory budget. I refactored signal computation pipelines from Pandas-native to Numba-JIT-compiled NumPy kernels, reducing signal generation time for the full cross-sectional universe from ~8 minutes to ~40 seconds — a 12x speedup that made the signal viable for the intraday rebalancing window.
 
+[🔝 Back to Top](#-table-of-contents)
+
 ---
 
 ### 📌 Responsibility 5
@@ -167,6 +200,8 @@ Every signal I developed went through a three-stage peer review before touching 
 
 - **Replication Book researchers:** I contributed signal primitives (regime indicators, positioning proxies) to the Replication team's alpha-capture workflow, enabling them to formalize patterns observed in discretionary PM behavior. This cross-pollination — where macro proprietary signals feed the replication layer — is only possible in a collaborative research culture, and it is precisely the kind of team dynamic I seek to replicate at Trexquant.
 
+[🔝 Back to Top](#-table-of-contents)
+
 ---
 
 ## 📋 Requirements Checklist
@@ -180,11 +215,15 @@ Every signal I developed went through a three-stage peer review before touching 
 | **Strong problem-solving** | Root-cause analysis framework; pre-mortem research culture; CPCV + DSR gating |
 | **Individual + team player** | Solo signal development + peer audit + Risk Committee + cross-team collaboration |
 
+[🔝 Back to Top](#-table-of-contents)
+
 ---
 
 ## 💬 Closing Statement for the Trexquant Interview Panel
 
 > Everything described above is not aspirational — it is the work I did last quarter. The reason I am excited about Trexquant is that your model — a shared signal library, thousands of statistical algorithms, collaborative research across equities, futures, commodities, and event-driven markets — is architecturally the most natural extension of everything I have built at Balyasny. The difference is that at Trexquant, this research-first, signal-first culture is the firm's singular identity, not one component within a larger multi-strategy platform. That distinction matters to me, and I am ready to contribute from day one.
+
+[🔝 Back to Top](#-table-of-contents)
 
 ---
 
