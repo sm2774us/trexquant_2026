@@ -11,9 +11,13 @@
 ## 🅐 Segment A · Who I Am (0:00 – 0:45)
 
 > "I am a Senior Quantitative Researcher with over 17 years of end-to-end systematic investment model development across elite buy-side institutions and sell-side institutions."
+>
 > "I sit on the **Macro Proprietary Book** — developing systematic investment models across Equities, Fixed Income, FX, Commodities, and Derivatives. But I operate with full awareness of the platform's broader architecture: how my signals interact with the Central Risk Book, how they may be consumed by the Replication layer, and how Execution Services TCM benchmarks constrain what counts as "real" alpha after costs."
+>
 > "This is not a narrow pod. It is a research environment that **demands signals be defensible at every layer** — statistical, economic, and execution."
+>
 > "I am genuinely excited about Trexquant because the role maps precisely to everything I do best: applying machine learning and statistical algorithms at scale to discover robust, market-neutral alpha signals from vast financial datasets — exactly the research culture I want to be embedded in full-time."
+>
 
 **Mental anchors:**
 
