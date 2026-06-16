@@ -11,8 +11,8 @@
 
 ## 📑 Table of Contents
 
-**[🏗️ Context: How Balyasny Systematic Is Structured](#️-context-how-balyasny-systematic-is-structured)**
-**[✅ JD Requirement → Balyasny Proof Point](#-jd-requirement--balyasny-proof-point)**
+- **[🏗️ Context: How Balyasny Systematic Is Structured](#️-context-how-balyasny-systematic-is-structured)**
+- **[✅ JD Requirement → Balyasny Proof Point](#-jd-requirement--balyasny-proof-point)**
   - [📌 Responsibility 1 - **Machine Learning & Asset Prediction**](#-responsibility-1)
   - [📌 Responsibility 2 - **Data Parsing & Alpha Signal Generation**](#-responsibility-2)
   - [📌 Responsibility 3 - **Academic Research & Implementation**](#-responsibility-3)
