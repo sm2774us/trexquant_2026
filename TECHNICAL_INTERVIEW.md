@@ -197,7 +197,10 @@ float should underperform over the next 20 days.
 Critical: use filing date, not position date. Avoids look-ahead bias.
 
 **Step 3 — Feature:**
-$$\text{ShortMomentum}_i = \frac{\Delta\text{SI}_{i,t} - \mu_{\Delta\text{SI}}}{\sigma_{\Delta\text{SI}}} \quad \text{(cross-sectional z-score)}$$
+
+$$
+\text{ShortMomentum}_i = \frac{\Delta\text{SI}_{i,t} - \mu_{\Delta\text{SI}}}{\sigma_{\Delta\text{SI}}} \quad \text{(cross-sectional z-score)}
+$$
 
 Neutralize by sector. Winsorize at 3σ to avoid extreme outliers in thin stocks.
 
