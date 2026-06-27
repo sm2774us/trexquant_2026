@@ -2056,7 +2056,10 @@ Turnover spikes                Solution changes monthly      Turnover penalty in
 ```
 
 **Ledoit-Wolf shrinkage (production fix for Σ):**
-$$\hat{\Sigma}^{\text{LW}} = \alpha \hat{\Sigma}_{\text{sample}} + (1-\alpha)\hat{\mu}_{var} \mathbf{I}$$
+
+$$
+\hat{\Sigma}^{\text{LW}} = \alpha \hat{\Sigma}_{\text{sample}} + (1-\alpha)\hat{\mu}_{var} \mathbf{I}
+$$
 
 Where $\alpha$ is chosen analytically to minimize expected squared Frobenius loss.
 
