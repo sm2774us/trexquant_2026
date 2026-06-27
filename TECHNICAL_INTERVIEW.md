@@ -565,7 +565,7 @@ phenomenon. Weight-penalize the newer signal by the overlap fraction.
 **Method 2 — Factor Crowding via 13F Positioning:**
 Track hedge fund aggregate positioning (from quarterly 13F filings, compiled by sources like FactSet).
 
-$$\text{HF Overlap}_i = \frac{\text{# top-10 HFs holding stock } i}{\text{Total HFs in universe}}$$
+$$\text{HF Overlap}_i = \frac{\text{\# top-10 HFs holding stock } i}{\text{Total HFs in universe}}$$
 
 $$\text{Crowding Signal}_t = z\!\left(\text{HF Overlap}_{i,t}\right) \text{ (cross-sectional z-score)}$$
 
