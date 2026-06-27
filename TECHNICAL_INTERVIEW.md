@@ -2429,7 +2429,7 @@ def simulate_coupon(n=6, trials=100_000):
 | $\hat{\boldsymbol{\beta}}_{\text{Ridge}}$ | $(\mathbf{X}^\top\mathbf{X} + \lambda\mathbf{I})^{-1}\mathbf{X}^\top\mathbf{y}$ |
 | $\mathbf{w}^{\*}_{\text{Mkt-Neutral}}$ | $\mathbf{\Sigma}^{-1}\boldsymbol{\alpha}$ s.t. $\mathbf{1}^\top\mathbf{w}=0$, $\boldsymbol{\beta}^\top\mathbf{w}=0$ |
 | $f^{\*}_{\text{Kelly}}$ | $\mu / \sigma^2$ (continuous) |
-| $\sigma_t^2_{\text{GARCH}}$ | $\omega + \alpha\epsilon_{t-1}^2 + \beta\sigma_{t-1}^2$ |
+| $`\sigma_{t^{2}_{\text{GARCH}}}`$ | $\omega + \alpha\epsilon_{t-1}^2 + \beta\sigma_{t-1}^2$ |
 | $Q_{\text{Ljung-Box}}$ | $T(T+2)\sum_{k=1}^m \hat{\rho}_k^2/(T-k) \sim \chi^2(m)$ |
 | $Z_t$ (cointegration) | $Y_t - \beta X_t \sim I(0)$ |
 | $\hat{\rho}_{XY}$ | $\text{Cov}(X,Y)/(\sigma_X\sigma_Y)$ |
