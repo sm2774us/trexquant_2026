@@ -610,9 +610,13 @@ and correlation with other known factors has risen sharply, assume crowding-driv
 
 **Signal construction:**
 
-$$\text{VOL\_SPIKE}_t = \frac{\Delta \text{VIX}_t - \mu_{\Delta\text{VIX}}}{\sigma_{\Delta\text{VIX}}} \quad \text{(1-day z-score of VIX change)}$$
+```math
+\text{VOL\_SPIKE}_t = \frac{\Delta \text{VIX}_t - \mu_{\Delta\text{VIX}}}{\sigma_{\Delta\text{VIX}}} \quad \text{(1-day z-score of VIX change)}
+```
 
-$$\text{ALPHA}_t = -\text{VOL\_SPIKE}_t \cdot \mathbf{1}\left[\text{VOL\_SPIKE}_t > 1.5\sigma\right]$$
+```math
+\text{ALPHA}_t = -\text{VOL\_SPIKE}_t \cdot \mathbf{1}\left[\text{VOL\_SPIKE}_t > 1.5\sigma\right]
+```
 
 **Go long commodities (crude oil, gold, copper) when $\text{ALPHA}_t$ is positive** (i.e., after a VIX spike)
 with position scaled by VIX spike magnitude.
