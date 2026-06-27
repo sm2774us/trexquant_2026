@@ -1331,7 +1331,10 @@ Jumps (crash returns)   Discontinuous distribution      Bootstrap required, not 
 ```
 
 **Fix 1 — Newey-West HAC Standard Errors:**
-$$\text{Var}_{\text{HAC}}(\hat{\beta}) = (\mathbf{X}^\top\mathbf{X})^{-1} \hat{\mathbf{\Omega}}_{\text{NW}} (\mathbf{X}^\top\mathbf{X})^{-1}$$
+
+$$
+\text{Var}_{\text{HAC}}(\hat{\beta}) = (\mathbf{X}^\top\mathbf{X})^{-1} \hat{\mathbf{\Omega}}_{\text{NW}} (\mathbf{X}^\top\mathbf{X})^{-1}
+$$
 
 Accounts for serial correlation in residuals; essential for finance t-statistics.
 
