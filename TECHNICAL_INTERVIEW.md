@@ -242,7 +242,7 @@ $$t_{\min} = \Phi^{-1}\!\left(1 - \frac{\alpha}{2N}\right)$$
 For $N = 100$ backtests: $t_{\min} \approx 4.1$, NOT 1.96.
 The Bailey-López de Prado **Deflated Sharpe Ratio (DSR)** penalizes for the number of trials:
 
-$$\widehat{SR}^* = \hat{SR} \cdot \left(1 - \gamma \cdot \hat{SR} \cdot \frac{\sqrt{V[\hat{SR}]}}{\sqrt{T}}\right)$$
+$$\widehat{SR}^{\*} = \hat{SR} \cdot \left(1 - \gamma \cdot \hat{SR} \cdot \frac{\sqrt{V[\hat{SR}]}}{\sqrt{T}}\right)$$
 
 **Rule 2 — Walk-Forward vs Random CV:**
 
@@ -360,7 +360,7 @@ $$h_{1/2} = \frac{\ln 2}{\lambda}$$
 
 **Optimal rebalancing frequency:**
 - Rebalance when the cost of *not* rebalancing (decayed IC) exceeds transaction cost.
-- In practice: rebalance at $h^* \approx h_{1/2}$.
+- In practice: rebalance at $h^{\*} \approx h_{1/2}$.
 
 ```
 DECAY CURVE EXAMPLE
@@ -467,7 +467,7 @@ Signal covariance: $\mathbf{\Sigma} = \mathbf{F}^\top \mathbf{F} / T$
 
 **Optimal weights (analogous to Markowitz for signals):**
 
-$$\mathbf{w}^* = \mathbf{\Sigma}^{-1} \boldsymbol{\mu}$$
+$$\mathbf{w}^{\*} = \mathbf{\Sigma}^{-1} \boldsymbol{\mu}$$
 
 This maximizes the Information Ratio of the combined signal.
 
@@ -1433,7 +1433,9 @@ Less conservative than Bonferroni. Controls the expected fraction of false disco
 Rank $p$-values: $p_{(1)} \leq p_{(2)} \leq \ldots \leq p_{(N)}$.
 Reject $H_{(i)}$ for all $i \leq k$ where:
 
-$$k = \max\!\left\{i : p_{(i)} \leq \frac{i}{N} \cdot \frac{q}{\sum_{j=1}^{N}(1/j)}\right\}$$
+$$
+k = \max\! \lbrace i : p_{(i)} \leq \frac{i}{N} \cdot \frac{q}{\sum_{j=1}^{N}(1/j)} \rbrace
+$$
 
 **Step 3 — Minimum Backtest Length:**
 
@@ -1523,23 +1525,23 @@ $$\binom{500}{3} = \frac{500!}{3! \cdot 497!} = \frac{500 \times 499 \times 498}
 
 **Probabilistic Sharpe Ratio (PSR):**
 
-$$\widehat{PSR}(SR^*) = \Phi\!\left(\frac{(\hat{SR} - SR^*)\sqrt{T-1}}{\sqrt{1 - \hat{\gamma}_3 \hat{SR} + \frac{\hat{\gamma}_4-1}{4}\hat{SR}^2}}\right)$$
+$$\widehat{PSR}(SR^{\*}) = \Phi\!\left(\frac{(\hat{SR} - SR^{\*})\sqrt{T-1}}{\sqrt{1 - \hat{\gamma}_3 \hat{SR} + \frac{\hat{\gamma}_4-1}{4}\hat{SR}^2}}\right)$$
 
 Where:
-- $SR^*$ = benchmark Sharpe ratio (typically 0 or the risk-free Sharpe)
+- $SR^{\*}$ = benchmark Sharpe ratio (typically 0 or the risk-free Sharpe)
 - $\hat{\gamma}_3$ = skewness of returns
 - $\hat{\gamma}_4$ = excess kurtosis of returns
 - $T$ = number of observations
 
 **Deflated Sharpe Ratio (DSR):**
 
-The benchmark $SR^*$ is set to the expected maximum Sharpe from $N$ IID trials:
+The benchmark $SR^{\*}$ is set to the expected maximum Sharpe from $N$ IID trials:
 
-$$SR^*_{\max} \approx \left(1 - \gamma\right)\Phi^{-1}\!\left(1 - \frac{1}{N}\right) + \gamma \Phi^{-1}\!\left(1 - \frac{1}{Ne}\right)$$
+$$SR^{\*}_{\max} \approx \left(1 - \gamma\right)\Phi^{-1}\!\left(1 - \frac{1}{N}\right) + \gamma \Phi^{-1}\!\left(1 - \frac{1}{Ne}\right)$$
 
 Where $\gamma \approx 0.5772$ (Euler-Mascheroni constant).
 
-$$DSR = \widehat{PSR}(SR^*_{\max})$$
+$$DSR = \widehat{PSR}(SR^{\*}_{\max})$$
 
 A DSR > 0.95 (i.e., PSR > 95% against the max-of-N benchmark) is required for promotion to live trading.
 
@@ -2035,7 +2037,7 @@ LAYER           CONSTRAINT                                PURPOSE
 $$\max_{\mathbf{w}} \; \boldsymbol{\mu}^\top \mathbf{w} - \frac{\lambda}{2} \mathbf{w}^\top \mathbf{\Sigma} \mathbf{w}$$
 
 **Closed-form (unconstrained):**
-$$\mathbf{w}^* = \frac{1}{\lambda} \mathbf{\Sigma}^{-1} \boldsymbol{\mu}$$
+$$\mathbf{w}^{\*} = \frac{1}{\lambda} \mathbf{\Sigma}^{-1} \boldsymbol{\mu}$$
 
 **The efficiency frontier** traces out the minimum-variance portfolios for each target return level.
 
@@ -2087,11 +2089,11 @@ $$\hat{\boldsymbol{\mu}} = \left[(\tau\mathbf{\Sigma})^{-1} + \mathbf{P}^\top\ma
 
 For a binary bet with win probability $p$, win payout $b$, lose amount 1:
 
-$$f^* = \frac{pb - (1-p)}{b} = \frac{p(b+1) - 1}{b}$$
+$$f^{\*} = \frac{pb - (1-p)}{b} = \frac{p(b+1) - 1}{b}$$
 
 **Continuous case (normal returns $r \sim \mathcal{N}(\mu, \sigma^2)$):**
 
-$$f^* = \frac{\mu}{\sigma^2}$$
+$$f^{\*} = \frac{\mu}{\sigma^2}$$
 
 **In practice: use half-Kelly:**
 
@@ -2150,9 +2152,9 @@ $$\hat{\mathbf{\Sigma}}^{\text{LW}}$$
 
 **Step 3 — Optimal signal weights:**
 
-$$\mathbf{w}^* = \hat{\mathbf{\Sigma}}^{-1\text{LW}} \cdot \boldsymbol{\mu}_{\text{EB}}$$
+$$\mathbf{w}^{\*} = \hat{\mathbf{\Sigma}}^{-1\text{LW}} \cdot \boldsymbol{\mu}_{\text{EB}}$$
 
-Normalize: $\tilde{\mathbf{w}} = \mathbf{w}^* / \|\mathbf{w}^*\|_1$ (sum-to-one constraint)
+Normalize: $\tilde{\mathbf{w}} = \mathbf{w}^{\*} / \|\mathbf{w}^{\*}\|_1$ (sum-to-one constraint)
 
 **Step 4 — Orthogonality check (Gram-Schmidt):**
 If any pair of signals has $|\rho| > 0.7$, orthogonalize via QR decomposition before combination.
@@ -2419,11 +2421,11 @@ def simulate_coupon(n=6, trials=100_000):
 | $ICIR$ | $\bar{IC} / \sigma_{IC}$ |
 | $IR$ | Information Ratio: $\bar{r}_{\text{active}} / \sigma_{\text{active}}$ |
 | $SR$ | Sharpe Ratio: $(\bar{r} - r_f) / \sigma_r$ |
-| $DSR$ | Deflated Sharpe: $\widehat{PSR}(SR^*_{\max})$ adjusted for $N$ trials |
+| $DSR$ | Deflated Sharpe: $\widehat{PSR}(SR^{\*}_{\max})$ adjusted for $N$ trials |
 | $\hat{\boldsymbol{\beta}}_{\text{OLS}}$ | $(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}$ |
 | $\hat{\boldsymbol{\beta}}_{\text{Ridge}}$ | $(\mathbf{X}^\top\mathbf{X} + \lambda\mathbf{I})^{-1}\mathbf{X}^\top\mathbf{y}$ |
-| $\mathbf{w}^*_{\text{Mkt-Neutral}}$ | $\mathbf{\Sigma}^{-1}\boldsymbol{\alpha}$ s.t. $\mathbf{1}^\top\mathbf{w}=0$, $\boldsymbol{\beta}^\top\mathbf{w}=0$ |
-| $f^*_{\text{Kelly}}$ | $\mu / \sigma^2$ (continuous) |
+| $\mathbf{w}^{\*}_{\text{Mkt-Neutral}}$ | $\mathbf{\Sigma}^{-1}\boldsymbol{\alpha}$ s.t. $\mathbf{1}^\top\mathbf{w}=0$, $\boldsymbol{\beta}^\top\mathbf{w}=0$ |
+| $f^{\*}_{\text{Kelly}}$ | $\mu / \sigma^2$ (continuous) |
 | $\sigma_t^2_{\text{GARCH}}$ | $\omega + \alpha\epsilon_{t-1}^2 + \beta\sigma_{t-1}^2$ |
 | $Q_{\text{Ljung-Box}}$ | $T(T+2)\sum_{k=1}^m \hat{\rho}_k^2/(T-k) \sim \chi^2(m)$ |
 | $Z_t$ (cointegration) | $Y_t - \beta X_t \sim I(0)$ |
