@@ -843,7 +843,10 @@ Initialize: $F_0(\mathbf{x}) = \arg\min_\gamma \sum_i L(y_i, \gamma)$
 For $m = 1, 2, \ldots, M$:
 
 **Step 1 — Compute pseudo-residuals:**
-$$r_{im} = -\left[\frac{\partial L(y_i, F(\mathbf{x}_i))}{\partial F(\mathbf{x}_i)}\right]_{F = F_{m-1}}$$
+
+$$
+r_{im} = -\left[\frac{\partial L(y_i, F(\mathbf{x}_i))}{\partial F(\mathbf{x}_i)}\right]_{F = F_{m-1}}
+$$
 
 **Step 2 — Fit a base learner** $h_m(\mathbf{x})$ to residuals $\{r_{im}\}$
 
