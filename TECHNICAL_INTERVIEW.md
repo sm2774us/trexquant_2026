@@ -3999,19 +3999,19 @@ $$\mathbb{E}[\hat{\sigma}_{XY}] = \text{Cov}(X,Y)$$
 **Proof:**
 
 $$
-\sum_i(x_i-\bar{x})(y_i-\bar{y}) = \sum_i x_i y_i - n\bar{x}\bar{y}
+\sum_i(x_i-\bar{x}) \cdot (y_i-\bar{y}) = \sum_i x_i \cdot y_i - n \cdot \bar{x} \cdot \bar{y}
 $$
 
 Taking expectation:
 
 $$
-\mathbb{E}[\sum x_i y_i] = n\mathbb{E}[XY]
+\mathbb{E}[\sum x_i \cdot y_i] = n \cdot \mathbb{E}[XY]
 $$
 
 And
 
 $$
-\mathbb{E}[n\bar{x}\bar{y}] = n(\text{Cov}(X,Y)/n + \mu_X\mu_Y) = \text{Cov}(X,Y) + n\mu_X\mu_Y
+\mathbb{E}[n\bar{x}\bar{y}] = n(\text{Cov}(X,Y)/n + \mu_X \cdot \mu_Y) = \text{Cov}(X,Y) + n \cdot \mu_X \cdot \mu_Y
 $$
 
 So,
