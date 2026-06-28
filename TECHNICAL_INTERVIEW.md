@@ -142,7 +142,7 @@ $$r_i = \alpha_i + \sum_{k=1}^{K}\beta_{ik}f_k + \epsilon_i$$
 
 $$
 \hat{\boldsymbol\beta}_i = (\mathbf{F}^\top\mathbf{F})^{-1}\mathbf{F}^\top \mathbf{r}_i
-$$,
+$$
 
 where $\mathbf{F}$ is the $T\times K$ matrix of factor returns. By the **normal equations** that define this projection,
 
