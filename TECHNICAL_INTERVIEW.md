@@ -924,8 +924,7 @@ precisely why shrinkage is mandatory in production, not optional polish.
 
 $$\text{IC}(f_{\text{alt}}, r_{t+h}) = \text{Corr}(f_{\text{alt},i,t},\; r_{i,t+h}) > 0 \quad \text{after point-in-time alignment}$$
 
-This requires the signal $f_{\text{alt},i,t}$ to be the value of the data *as it was known at time $t$*,
-not as it was subsequently revised.
+This requires the signal $f_{\text{alt},i,t}$ to be the value of the data **as it was known at time $t$** , not as it was subsequently revised.
 
 **Step 2 — Point-in-time (PIT) data vs. as-reported data.** For any time-stamped data source,
 define:
