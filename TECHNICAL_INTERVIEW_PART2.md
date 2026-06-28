@@ -1272,7 +1272,9 @@ $\hat{t}_\gamma$ is very negative.
 
 Reject $H_0$ if
 
-$\hat{t}_\gamma \lt \text{CV}_{5\\%} \approx -3.41$
+$$
+\hat{t}_\gamma \lt \text{CV}_{5\\%} \approx -3.41
+$$
 
 **Lag selection:** Choose $p$ to minimize AIC:
 
