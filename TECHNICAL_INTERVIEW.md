@@ -1438,7 +1438,7 @@ where $z_{\text{CL},t}$ is the z-score of crude oil's own daily return. This ens
 only go long when oil did not itself make an extreme move on the same day.
 
 **Step 4 — Signal IC target derivation.** If the 3-day commodity return after VIX spikes
-has mean $\mu_{3d} = 0.8\%$ and standard deviation $\sigma_{3d} = 2.5\%$, the expected IC:
+has mean $\mu_{3d} = 0.8\\%$ and standard deviation $\sigma_{3d} = 2.5\\%$, the expected IC:
 
 $$\text{IC}_{\text{3d}} \approx \frac{\mu_{3d}}{\sigma_{3d}} \cdot \frac{1}{\sqrt{N_{\text{events}}}} \approx 0.32 \cdot \frac{1}{\sqrt{N}}$$
 
@@ -4558,14 +4558,9 @@ Since $e^{t^2/2}$ is the MGF of $\mathcal{N}(0,1)$, convergence in MGF implies c
 
 **Violation 1 — Fat tails (excess kurtosis):**
 
-Daily equity returns have excess kurtosis $\kappa \approx 4$–$8$ (Normal has $\kappa=0$).
-The convergence rate of the CLT for the sample mean is $O(n^{-1/2})$, but the residual error
-in the Normal approximation is proportional to $\kappa / n$. For $\kappa = 6$, you need
-$n > 600$ observations for the error to be < 1% — but for testing monthly IC estimates
-($n = 21$ daily observations), the Normal approximation is poor.
+Daily equity returns have excess kurtosis $\kappa \approx 4 \text{–} 8$ (Normal has $\kappa=0$). The convergence rate of the CLT for the sample mean is $O(n^{-1/2})$, but the residual error in the Normal approximation is proportional to $\kappa / n$. For $\kappa = 6$, you need $n > 600$ observations for the error to be < 1% — but for testing monthly IC estimates($n = 21$ daily observations), the Normal approximation is poor.
 
-**Fix:** Use the $t$-distribution with $\nu = 2/\kappa \cdot n$ adjusted degrees of freedom,
-or bootstrap.
+**Fix:** Use the $t$-distribution with $\nu = 2/\kappa \cdot n$ adjusted degrees of freedom, or bootstrap.
 
 **Violation 2 — Serial correlation:**
 
@@ -4573,9 +4568,7 @@ If $\text{Corr}(X_t, X_{t+k}) = \rho_k \neq 0$, the sample mean $\bar{X}_n$ has 
 
 $$\text{Var}(\bar{X}_n) = \frac{\sigma^2}{n}\left(1 + 2\sum_{k=1}^{n-1}\left(1-\frac{k}{n}\right)\rho_k\right) \approx \frac{\sigma^2}{n}\left(1 + 2\sum_{k=1}^{\infty}\rho_k\right)$$
 
-The factor $1 + 2\sum_k \rho_k$ is the **long-run variance** multiplier. For momentum signals
-with $\rho_1 \approx 0.2$, this inflates the variance by approximately $1 + 2 \times 0.2 = 1.4$,
-meaning standard errors are underestimated by $\sqrt{1.4} \approx 18\%$.
+The factor $1 + 2\sum_k \rho_k$ is the **long-run variance** multiplier. For momentum signals with $\rho_1 \approx 0.2$, this inflates the variance by approximately $1 + 2 \times 0.2 = 1.4$, meaning standard errors are underestimated by $\sqrt{1.4} \approx 18\\%$.
 
 **Fix — Newey-West long-run variance estimator:**
 
