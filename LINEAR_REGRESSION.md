@@ -4,7 +4,7 @@
 
 > True DGP: $y = X\beta + \epsilon$, $X$ is $n\times k$ full rank, $\epsilon \sim N(0,\sigma^2 I_n)$, independent of $X$.
 > This is the **correctly specified** $k$-feature model — no omitted variables, right functional form.
-> We then form the **augmented** design $X_+ = [X \;\; x_{k+1}]$ ($n\times(k+1)$, full rank, $x_{k+1}\notin\text{col}(X)$),
+> We then form the **augmented** design $X_+ = [X \;\; x_{k+1}]$ ( $n\times(k+1)$, full rank, $x_{k+1}\notin\text{col}(X)$ ),
 > where $x_{k+1}$ is a feature you already know **does not work** — i.e. its *true* population coefficient is
 > $\beta_{k+1}=0$. The augmented model is therefore *also* correctly specified (it nests the truth with one
 > redundant parameter pinned at zero). Define:
