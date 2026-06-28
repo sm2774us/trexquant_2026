@@ -3994,7 +3994,9 @@ $$\hat{\sigma}_{XY} = \frac{1}{n-1}\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})$$
 
 $$\mathbb{E}[\hat{\sigma}_{XY}] = \text{Cov}(X,Y)$$
 
-*Proof:*
+---
+
+**Proof:**
 
 $$
 \sum_i(x_i-\bar{x})(y_i-\bar{y}) = \sum_i x_i y_i - n\bar{x}\bar{y}
@@ -4018,7 +4020,9 @@ $$
 \mathbb{E}[\text{numerator}] = (n-1)\text{Cov}(X,Y)
 $$
 
-and dividing by $n-1$ gives the unbiased result. $\tag*{$\blacksquare$}$
+and dividing by $n-1$ gives the unbiased result. 
+
+$$\tag*{$\blacksquare$}$$
 
 **Step 4 — Pearson Correlation:**
 
