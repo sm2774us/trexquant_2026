@@ -1195,11 +1195,15 @@ CORRELATION THRESHOLD    ACTION
 
 **Hedge fund overlap score for stock $i$ at quarter-end $q$:**
 
-$$\text{HF\_Overlap}_{i,q} = \frac{|\{m : \text{HF } m \text{ holds stock } i \text{ in top 20 positions}\}|}{M_q}$$
+```math
+\text{HF\_Overlap}_{i,q} = \frac{|\{m : \text{HF } m \text{ holds stock } i \text{ in top 20 positions}\}|}{M_q}
+```
 
 **Cross-sectional z-score (crowding signal):**
 
-$$Z_{\text{crowd},i,q} = \frac{\text{HF\_Overlap}_{i,q} - \bar{\text{HF\_Overlap}}_q}{\sigma_{\text{HF\_Overlap},q}}$$
+```math
+Z_{\text{crowd},i,q} = \frac{\text{HF\_Overlap}_{i,q} - \bar{\text{HF\_Overlap}}_q}{\sigma_{\text{HF\_Overlap},q}}
+```
 
 **Crowding-adjusted alpha:**
 
