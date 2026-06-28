@@ -3102,7 +3102,7 @@ Concentration risk  Uncontrolled          Max position limit
 > "I never use raw MVO in production. My workflow: (1) Black-Litterman expected returns
 > with signal IC-weighted views and uncertainty $\Omega_{kk} = \text{Var}(\hat{IC}_k) \times \hat{\sigma}_k^2$,
 > (2) Ledoit-Wolf covariance, (3) constrained QP (CVXPY/CLARABEL) with position limits
-> and $\delta\|\mathbf{w}_t - \mathbf{w}_{t-1}\|^2$ turnover penalty.
+> and $\delta\|\mathbf{w}_t - \mathbf{w}_{t-1}\|^{2}$ turnover penalty.
 > The turnover penalty alone reduced annual transaction costs by 35% vs unconstrained MVO."
 
 [🔝 Back to Top](./TECHNICAL_INTERVIEW.md#table-of-contents)
