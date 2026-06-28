@@ -2504,7 +2504,7 @@ $$\ell_t = \ln\Gamma\!\left(\frac{\nu+1}{2}\right) - \ln\Gamma\!\left(\frac{\nu}
 
 Optimize via BFGS with analytical gradient or quasi-Newton methods.
 
-**Initialization:** $\sigma_1^2 = $ sample variance of $r_t$.
+**Initialization:** $\sigma_{1}^{2} =$ sample variance of $r_t$.
 
 ---
 
