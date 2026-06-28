@@ -1292,7 +1292,7 @@ where $S_t = \sum_{j=1}^t e_j$ (partial sums of OLS residuals) and $\hat{\sigma}
 a long-run variance estimate. Large values reject stationarity.
 
 **Confirming stationarity requires both:**
-- ADF rejects $H_0$ (unit root rejected): $\|t\| > $ critical value
+- ADF rejects $H_0$ (unit root rejected): $\|t\| \gt$ critical value
 - KPSS fails to reject $H_0$ (stationarity not rejected): statistic $<$ 0.463 at 5%
 
 ---
