@@ -49,7 +49,7 @@ $\sigma_{\text{annual}} = \sigma_{\text{daily}} \sqrt{252}$ (variance scales lin
 
 **1. Autocorrelation Inflation (Lo, 2002):**
 
-If returns have lag-$k$ autocorrelation $\rho_k$, the true $q$-period variance is:
+If returns have $\text{lag-}k$ autocorrelation $\rho_k$, the true $q\text{-period}$ variance is:
 
 $$\sigma_q^2 = q\sigma^2\left[1 + 2\sum_{k=1}^{q-1}\left(1 - \frac{k}{q}\right)\rho_k\right]$$
 
