@@ -1267,8 +1267,19 @@ where:
 It follows the Dickey-Fuller distribution, which has fatter left tails. Critical values
 (MacKinnon 2010) for the constant+trend variant at 5%: $-3.41$ (not $-1.96$!).
 
-**Under $H_1: \gamma < 0$** (mean-reverting / stationary), $\hat{t}_\gamma$ is very negative.
-Reject $H_0$ if $\hat{t}_\gamma < \text{CV}_{5\%} \approx -3.41$.
+**Under $H_1: \gamma < 0$** (mean-reverting / stationary),
+
+$$
+\hat{t}_\gamma
+$$
+
+is very negative.
+
+Reject $H_0$ if
+
+$$
+\hat{t}_\gamma < \text{CV}_{5\%} \approx -3.41
+$$
 
 **Lag selection:** Choose $p$ to minimize AIC:
 
