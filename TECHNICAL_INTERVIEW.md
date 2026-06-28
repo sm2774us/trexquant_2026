@@ -138,22 +138,28 @@ $\mathbf{f} = (f_1,\ldots,f_K)$ (market, value, momentum, size, quality, …):
 
 $$r_i = \alpha_i + \sum_{k=1}^{K}\beta_{ik}f_k + \epsilon_i$$
 
-**Step 5 — Derive $\hat\beta_{ik}$ as the OLS projection coefficients** (see Q11 for the full derivation):
-$\hat{\boldsymbol\beta}_i = (\mathbf{F}^\top\mathbf{F})^{-1}\mathbf{F}^\top \mathbf{r}_i$, where $\mathbf{F}$ is the
-$T\times K$ matrix of factor returns. By the **normal equations** that define this projection,
-$\mathbf{F}^\top(\mathbf{r}_i - \mathbf{F}\hat{\boldsymbol\beta}_i) = \mathbf{0}$ — i.e. *the residual is, by
-construction, orthogonal to every factor in $\mathbf{F}$.* This orthogonality is exactly what makes $\alpha_i$ a
+**Step 5 — Derive $\hat\beta_{ik}$ as the OLS projection coefficients** **[(see Q11 for the full derivation)](#q11--derive-linear-regression-from-first-principles-in-matrix-form)** :
+
+$$
+\hat{\boldsymbol\beta}_i = (\mathbf{F}^\top\mathbf{F})^{-1}\mathbf{F}^\top \mathbf{r}_i
+$$,
+
+where $\mathbf{F}$ is the $T\times K$ matrix of factor returns. By the **normal equations** that define this projection,
+
+$$
+\mathbf{F}^\top(\mathbf{r}_i - \mathbf{F}\hat{\boldsymbol\beta}_i) = \mathbf{0}
+$$
+
+— i.e. **the residual is, by construction, orthogonal to every factor in $\mathbf{F}$.** This orthogonality is exactly what makes $\alpha_i$ a
 clean, factor-independent quantity rather than a relabeled beta.
 
 **Step 6 — Excess-return form (subtract the risk-free rate $r_f$):**
 
-$$\alpha_i = \mathbb{E}[r_i] - r_f - \sum_{k=1}^{K}\beta_{ik}\big(\mathbb{E}[f_k] - r_f\big)$$
+$$
+\alpha_i = \mathbb{E}[r_i] - r_f - \sum_{k=1}^{K}\beta_{ik}\big(\mathbb{E}[f_k] - r_f\big)
+$$
 
-**Step 7 — The key consistency check.** $\alpha_i$ is only "real" alpha if it is uncorrelated with *every*
-factor anyone might later add to $\mathbf{F}$. If a newly-discovered factor $f_{K+1}$ turns out to explain
-$\alpha_i$ (i.e. $\text{Cov}(\alpha_i, f_{K+1}) \ne 0$), the alpha was never orthogonal — it was an
-undiscovered beta. This is precisely why Fama-French grew from 1 factor (CAPM) → 3 → 5 → 6 factors: each
-generation of "alpha" from the prior model got re-explained as beta to a newly identified factor.
+**Step 7 — The key consistency check.** $\alpha_i$ is only "real" alpha if it is uncorrelated with *every* factor anyone might later add to $\mathbf{F}$. If a newly-discovered factor $f_{K+1}$ turns out to explain $\alpha_i$ (i.e. $\text{Cov}(\alpha_i, f_{K+1}) \ne 0$), the alpha was never orthogonal — it was an undiscovered beta. This is precisely why Fama-French grew from 1 factor (CAPM) → 3 → 5 → 6 factors: each generation of "alpha" from the prior model got re-explained as beta to a newly identified factor.
 
 ---
 
