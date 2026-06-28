@@ -3975,11 +3975,11 @@ $$\text{Cov}(X, Y) = \mathbb{E}[(X - \mu_X)(Y - \mu_Y)]$$
 **Step 2 — Expand the product:**
 
 $$
-\begin{align}
-\text{Cov}(X,Y) = \mathbb{E} \lbrace XY - X\mu_Y - Y\mu_X + \mu_X \cdot \mu_Y \rbrace \\
-= \mathbb{E}[XY] - \mu_Y\mathbb{E}[X] - \mu_X\mathbb{E}[Y] + \mu_X \cdot \mu_Y \\
-= \mathbb{E}[XY] - \mu_X\mu_Y - \mu_X\mu_Y + \mu_X \cdot \mu_Y
-\end{align}
+\begin{flalign}
+&& \text{Cov}(X,Y) = \mathbb{E} \lbrace XY - X\mu_Y - Y\mu_X + \mu_X \cdot \mu_Y \rbrace & \\
+&& &= \mathbb{E}[XY] - \mu_Y\mathbb{E}[X] - \mu_X\mathbb{E}[Y] + \mu_X \cdot \mu_Y & \\
+&& &= \mathbb{E}[XY] - \mu_X\mu_Y - \mu_X\mu_Y + \mu_X \cdot \mu_Y &
+\end{flalign}
 $$
 
 |     |
