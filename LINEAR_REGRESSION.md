@@ -9,7 +9,7 @@
 >
 > This is the **correctly specified** $k$-feature model — no omitted variables, right functional form.
 >
-> We then form the **augmented** design $X_+ = [X \;\; x_{k+1}]$ ( $n\times(k+1)$, full rank, $x_{k+1} \notin \text{col}(X)$ ),
+> We then form the **augmented** design $X_+ = [X \, x_{k+1}]$ ( $n\times(k+1)$, full rank, $x_{k+1} \notin \text{col}(X)$ ),
 >
 > where $x_{k+1}$ is a feature you already know **does not work** — i.e. its *true* population coefficient is $\beta_{k+1}=0$.
 > The augmented model is therefore *also* correctly specified (it nests the truth with one redundant parameter pinned at zero).
@@ -193,7 +193,7 @@ $\hat\epsilon_k = M_Xy$ is, by construction of the orthogonal projector, perpend
 $\text{col}(X)$: $X^\top\hat\epsilon_k = X^\top M_X y = 0$ — the normal equations *are* the orthogonality condition.
 
 **Step 2 — Nested subspaces: $\text{col}(X)\subset\text{col}(X_+)$.**
-Because $X_+=[X\;\;x_{k+1}]$, every linear combination of $X$'s columns is trivially also a linear combination of
+Because $X_+=[X \, x_{k+1}]$, every linear combination of $X$'s columns is trivially also a linear combination of
 $X_+$'s columns (just set the new coefficient to 0). So $\text{col}(X)$ is a $k$-dimensional subspace strictly
 nested inside the $(k+1)$-dimensional $\text{col}(X_+)$.
 
@@ -270,7 +270,7 @@ inside a space that is, by assumption, nothing but noise.**
 ### 🔎 Follow-Up Questions
 
 **FU1 — "State Frisch–Waugh–Lovell formally and say why it matters operationally."**
-For any partition $X_+=[X_1\;\;X_2]$, the OLS coefficient on $X_2$ from the *full* regression equals the OLS
+For any partition $X_+=[X_1 \, X_2]$, the OLS coefficient on $X_2$ from the *full* regression equals the OLS
 coefficient from regressing $M_{X_1}y$ on $M_{X_1}X_2$. Operationally: **you can always interpret a multi-factor
 model coefficient as a simple bivariate regression after "cleaning" both sides against everything else.** In a
 macro pod, this is exactly how you read a partial-correlation / marginal-contribution chart for a new signal
