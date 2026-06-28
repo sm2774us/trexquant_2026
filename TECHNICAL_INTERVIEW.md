@@ -567,7 +567,7 @@ breadth=  256  empirical per-period IR=0.8291   IC*sqrt(N)=0.8000
 breadth= 1024  empirical per-period IR=1.5899   IC*sqrt(N)=1.6000
 ```
 
-The match tightens as $N$ grows (small-$N$ noise comes from the $1/\sqrt{1+IC^2}$ correction in Step 4
+The match tightens as $N$ grows (small - $N$ noise comes from the $1/\sqrt{1+IC^2}$ correction in Step 4
 and finite-sample Monte-Carlo error) — exactly the predicted $IC\sqrt{N}$ scaling.
 
 ### IC Benchmarks for Trexquant's Equity Universe
