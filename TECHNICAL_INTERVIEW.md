@@ -5413,10 +5413,15 @@ LAYER           CONSTRAINT                                PURPOSE
 
 ### MVO Formulation
 
-$$\max_{\mathbf{w}} \; \boldsymbol{\mu}^\top \mathbf{w} - \frac{\lambda}{2} \mathbf{w}^\top \mathbf{\Sigma} \mathbf{w}$$
+$$
+\max_{\mathbf{w}} \; \boldsymbol{\mu}^\top \mathbf{w} - \frac{\lambda}{2} \mathbf{w}^\top \mathbf{\Sigma} \mathbf{w}
+$$
 
 **Closed-form (unconstrained):**
-$$\mathbf{w}^{\*} = \frac{1}{\lambda} \mathbf{\Sigma}^{-1} \boldsymbol{\mu}$$
+
+$$
+\mathbf{w}^{\*} = \frac{1}{\lambda} \mathbf{\Sigma}^{-1} \boldsymbol{\mu}
+$$
 
 **The efficiency frontier** traces out the minimum-variance portfolios for each target return level.
 
