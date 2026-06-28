@@ -4574,7 +4574,11 @@ The factor $1 + 2\sum_k \rho_k$ is the **long-run variance** multiplier. For mom
 
 $$\hat{V}_{NW} = \hat{\gamma}_0 + 2\sum_{k=1}^L w_k \hat{\gamma}_k, \quad w_k = 1 - \frac{k}{L+1}$$
 
-where $\hat{\gamma}_k = \frac{1}{n}\sum_{t=k+1}^n (X_t - \bar{X})(X_{t-k} - \bar{X})$.
+where:
+
+$$
+\hat{\gamma}_k = \frac{1}{n}\sum_{t=k+1}^n (X_t - \bar{X})(X_{t-k} - \bar{X})
+$$
 
 **Violation 3 — Non-stationarity:**
 
