@@ -4454,8 +4454,8 @@ if __name__ == "__main__":
 | $DSR$ | $\widehat{PSR}(SR^*_{\max})$ — Deflated Sharpe Ratio |
 | $t_{\min}^{\text{Bonf}}$ | $\Phi^{-1}(1-\alpha/(2N))$ — Bonferroni critical $t$-statistic |
 | $\tilde{\mu}_{IC}$ | EB-shrunk IC: $\frac{\tau^2}{\tau^2+\sigma^2_{\hat{IC}}}\hat{\mu}_{IC}$ |
-| $\hat{\boldsymbol{\Sigma}}^{\text{LW}}$ | $(1-\alpha)\hat{\Sigma}_{\text{sample}} + \alpha\hat{\mu}_{\text{var}}\mathbf{I}$ |
-| ADF statistic | $\hat{t}_\gamma$ from $\Delta X_t = \alpha + \beta t + \gamma X_{t-1} + \sum\delta_j\Delta X_{t-j} + \epsilon_t$ |
+| $\hat{\boldsymbol{\Sigma}}^{\text{LW}}$ | $`(1-\alpha)\hat{\Sigma}_{\text{sample}} + \alpha\hat{\mu}_{\text{var}}\mathbf{I}`$ |
+| ADF statistic | $`\hat{t}_\gamma`$ from $`\Delta X_t = \alpha + \beta t + \gamma X_{t-1} + \sum\delta_j\Delta X_{t-j} + \epsilon_t`$ |
 | $\text{GARCH}(1,1)$ | $\sigma_t^2 = \omega + \alpha\epsilon_{t-1}^2 + \beta\sigma_{t-1}^2$, constrain $\alpha+\beta<1$ |
 | GARCH log-lik | $\mathcal{L} = -\frac{1}{2}\sum_t[\ln\sigma_t^2 + \epsilon_t^2/\sigma_t^2]$ (Gaussian) |
 | $f^*_{\text{Kelly}}$ | $\mu/\sigma^2$ (continuous); $p - (1-p)/b$ (discrete) |
@@ -4465,7 +4465,7 @@ if __name__ == "__main__":
 | EWOLS $\lambda$ | $1 - \ln 2 / h_{1/2}$ where $h_{1/2}$ = half-life in periods |
 | $Q(m)$ (Ljung-Box) | $T(T+2)\sum_{k=1}^m\hat{\rho}_k^2/(T-k)\sim\chi^2(m)$ |
 | DW | $\approx 2(1-\hat{\rho}_1)$; near 2 = no serial correlation |
-| ICIR bound | $\sqrt{\boldsymbol{\mu}_{IC}^\top \mathbf{C}^{-1}\boldsymbol{\mu}_{IC}}$ |
+| ICIR bound | $`\sqrt{\boldsymbol{\mu}_{IC}^\top \mathbf{C}^{-1}\boldsymbol{\mu}_{IC}}`$ |
 | $E[T_{\text{Coupon}}]$ | $k\cdot H_k = k\sum_{j=1}^k 1/j$ |
 
 ---
