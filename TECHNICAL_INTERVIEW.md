@@ -4209,11 +4209,9 @@ $$\mathbf{P} = (p_{ij}), \quad \sum_{j=1}^K p_{ij} = 1 \; \forall i \quad (\text
 
 $$P(X_{t+n} = s_j \mid X_t = s_i) = [\mathbf{P}^n]_{ij}$$
 
-**Stationary distribution** $\boldsymbol{\pi}$: satisfies $\boldsymbol{\pi}^\top\mathbf{P} = \boldsymbol{\pi}^\top$
-(left eigenvector of $\mathbf{P}$ for eigenvalue 1) with $\sum_i \pi_i = 1, \pi_i \geq 0$.
+**Stationary distribution** $\boldsymbol{\pi}$: satisfies $\boldsymbol{\pi}^\top\mathbf{P} = \boldsymbol{\pi}^\top$ (left eigenvector of $\mathbf{P}$ for eigenvalue 1) with $\sum_i \pi_i = 1, \pi_i \geq 0$.
 
-*Finding $\boldsymbol{\pi}$:* Solve $(\mathbf{P}^\top - \mathbf{I})\boldsymbol{\pi} = \mathbf{0}$ subject to
-$\mathbf{1}^\top\boldsymbol{\pi} = 1$.
+**Finding $\boldsymbol{\pi}$:** Solve $(\mathbf{P}^\top - \mathbf{I})\boldsymbol{\pi} = \mathbf{0}$ subject to $\mathbf{1}^\top\boldsymbol{\pi} = 1$.
 
 **Expected return time** to state $s_i$:
 
