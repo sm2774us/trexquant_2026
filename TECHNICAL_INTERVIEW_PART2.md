@@ -373,7 +373,7 @@ $$T_{\min} = \left(\frac{(z_{1-\alpha/N} + z_{1-\beta})\hat{\sigma}}{\hat{\mu}}\
 
 where $z_p = \Phi^{-1}(p)$.
 
-For $\hat{\mu} = 5\%$ annual ($\approx 0.02\%$ daily), $\hat{\sigma} = 15\%$ annual ($\approx 0.94\%$ daily),
+For $\hat{\mu} = 5\\%$ annual ($\approx 0.02\\%$ daily), $\hat{\sigma} = 15\\%$ annual ($\approx 0.94\\%$ daily),
 $\alpha = 0.05$, $N = 50$, $\beta = 0.20$:
 
 $$T_{\min} = \left(\frac{(3.87 + 0.84) \times 0.0094}{0.0002}\right)^2 = \left(\frac{0.0443}{0.0002}\right)^2 = 221.5^2 \approx 49{,}062 \text{ days} \approx 195 \text{ years}$$
@@ -1268,18 +1268,11 @@ It follows the Dickey-Fuller distribution, which has fatter left tails. Critical
 (MacKinnon 2010) for the constant+trend variant at 5%: $-3.41$ (not $-1.96$!).
 
 **Under $H_1: \gamma < 0$** (mean-reverting / stationary),
-
-$$
-\hat{t}_\gamma
-$$
-
-is very negative.
+$\hat{t}_\gamma$ is very negative.
 
 Reject $H_0$ if
 
-$$
-\hat{t}_\gamma < \text{CV}_{5\%} \approx -3.41
-$$
+$\hat{t}_\gamma \lt \text{CV}_{5\\%} \approx -3.41$
 
 **Lag selection:** Choose $p$ to minimize AIC:
 
@@ -2772,7 +2765,7 @@ $$\boldsymbol{\beta}^\top \mathbf{h} = 0 \quad \text{(beta-neutral)}$$
 
 $$\mathbf{B}^\top \mathbf{h} = \mathbf{0} \quad \text{(factor-neutral: B is n×K Barra factor loading matrix)}$$
 
-$$\|h_i\| \leq h_{\max} \; \forall i \quad \text{(position limit, e.g., 2\% of GMV)}$$
+$$\|h_i\| \leq h_{\max} \; \forall i \quad \text{(position limit, e.g., 2\\% of GMV)}$$
 
 $$|h_i| \leq \kappa \cdot \text{ADV}_i \; \forall i \quad \text{(liquidity constraint)}$$
 
