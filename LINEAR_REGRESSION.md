@@ -35,25 +35,52 @@ before touching any of the three sub-questions.
 ### 🧮 First-Principles Derivation
 
 **Step 1 — Unbiasedness is preserved (this is the asymmetric twin of omitted-variable bias).**
+
 Because $\beta_{k+1}=0$ truly, $X_+$ contains the true model as a special case. OLS on the augmented design gives:
-$$\hat\beta_+ = (X_+^\top X_+)^{-1}X_+^\top y, \qquad \mathbb{E}[\hat\beta_+ \mid X_+] = (X_+^\top X_+)^{-1}X_+^\top \mathbb{E}[y\mid X_+] = (X_+^\top X_+)^{-1}X_+^\top X_+\beta_+ = \beta_+$$
-where $\beta_+ = (\beta^\top, 0)^\top$. So $\mathbb{E}[\hat\beta_j]=\beta_j$ for $j\le k$ **and** $\mathbb{E}[\hat\beta_{k+1}]=0$.
-Contrast this with the *reverse* mistake (omitting a relevant regressor $x_{k+1}$ that is correlated with $X$):
+
+$$
+\hat\beta_+ = (X_+^\top X_+)^{-1}X_+^\top y, \qquad \mathbb{E}[\hat\beta_+ \mid X_+] = (X_+^\top X_+)^{-1}X_+^\top \mathbb{E}[y\mid X_+] = (X_+^\top X_+)^{-1}X_+^\top X_+\beta_+ = \beta_+
+$$
+
+where:
+
+$$\beta_+ = (\beta^\top, 0)^\top$$
+
+So:
+
+$$\mathbb{E}[\hat\beta_j]=\beta_j$ for $j\le k$$
+
+**and**
+
+$$\mathbb{E}[\hat\beta_{k+1}]=0$$
+
+Contrast this with the *reverse* mistake ( omitting a relevant regressor $x_{k+1}$ that is correlated with $X$ ):
+
 $$\mathbb{E}[\hat\beta^{short}] = \beta + \delta\,\beta_{k+1}, \qquad \delta=(X^\top X)^{-1}X^\top x_{k+1}$$
-Omission biases the kept coefficients (unless $\delta=0$); **inclusion of a useless feature never does.** This
-asymmetry is the whole point of the question.
+
+> Omission biases the kept coefficients (unless $\delta=0$); **inclusion of a useless feature never does.** This asymmetry is the whole point of the question.
+>
 
 **Step 2 — In-sample fit weakly improves, by construction, regardless of truth.**
-OLS minimizes $\|y-X_+\gamma\|^2$ over a strictly larger feasible set than $\|y-X\beta\|^2$ (set $\gamma_{k+1}=0$ to
-recover the smaller problem), so:
-$$RSS_{k+1} \le RSS_k \quad\Longrightarrow\quad R^2_{k+1}\ge R^2_k \quad\text{always, with equality iff } \tilde x_{k+1}^\top y = 0$$
-With continuous data this is a probability-zero event — **$R^2$ will go up even though the feature is genuinely
-useless.** This is the mechanical artifact that makes naive in-sample $R^2$ unusable as a feature-inclusion gate.
+
+OLS minimizes $\|y-X_+\gamma\|^2$ over a strictly larger feasible set than $\|y-X\beta\|^2$ (set $\gamma_{k+1}=0$ to recover the smaller problem), so:
+
+$$
+RSS_{k+1} \le RSS_k \quad\Longrightarrow\quad R^2_{k+1}\ge R^2_k \quad\text{always, with equality iff } \tilde x_{k+1}^\top y = 0
+$$
+
+With continuous data this is a probability-zero event — **$R^2$ will go up even though the feature is genuinely useless.** This is the mechanical artifact that makes naive in-sample $R^2$ unusable as a feature-inclusion gate.
 
 **Step 3 — Quantify the expected drop in residual sum of squares.**
-Since the model is correctly specified, $\hat\epsilon_k = M_Xy = M_X\epsilon$ (the true signal is annihilated by
-$M_X$). Using $\tilde x_{k+1}^\top \hat y_k = 0$ (orthogonality of projections):
+
+Since the model is correctly specified,
+
+$$\hat\epsilon_k = M_Xy = M_X\epsilon$$
+
+( the true signal is annihilated by $M_X$ ). Using $\tilde x_{k+1}^\top \hat y_k = 0$ (orthogonality of projections):
+
 $$\hat\beta_{k+1} = \frac{\tilde x_{k+1}^\top y}{\tilde x_{k+1}^\top \tilde x_{k+1}} = \frac{\tilde x_{k+1}^\top \epsilon}{\|\tilde x_{k+1}\|^2}, \qquad RSS_k-RSS_{k+1}=\hat\beta_{k+1}^2\,\|\tilde x_{k+1}\|^2 = \frac{(\tilde x_{k+1}^\top \epsilon)^2}{\|\tilde x_{k+1}\|^2}$$
+
 Conditioning on $X_+$, $\tilde x_{k+1}^\top\epsilon \sim N(0,\sigma^2\|\tilde x_{k+1}\|^2)$, so the quantity above is
 $\sigma^2\chi^2_1$, hence:
 $$\boxed{\mathbb{E}[RSS_k - RSS_{k+1}] = \sigma^2 \text{ exactly} }$$
