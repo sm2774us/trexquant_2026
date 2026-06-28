@@ -4,14 +4,21 @@
 
 > True DGP: $y = X\beta + \epsilon$, $X$ is $n\times k$ full rank, $\epsilon \sim N(0,\sigma^2 I_n)$, independent of $X$.
 > This is the **correctly specified** $k$-feature model — no omitted variables, right functional form.
-> We then form the **augmented** design $X_+ = [X \;\; x_{k+1}]$ ( $n\times(k+1)$, full rank, $x_{k+1}\notin\text{col}(X)$ ),
+> We then form the **augmented** design $X_+ = [X \;\; x_{k+1}]$ ($n\times(k+1)$, full rank, $x_{k+1}\notin\text{col}(X)$),
 > where $x_{k+1}$ is a feature you already know **does not work** — i.e. its *true* population coefficient is
 > $\beta_{k+1}=0$. The augmented model is therefore *also* correctly specified (it nests the truth with one
 > redundant parameter pinned at zero). Define:
 >
-> $$P_X = X(X^\top X)^{-1}X^\top,\quad M_X = I-P_X \qquad\text{(orthogonal projector onto col(X), its annihilator)}$$
-> $$\tilde x_{k+1} = M_X x_{k+1} \qquad\text{(component of the new feature orthogonal to everything already in the model)}$$
-> $$\hat y_k = P_Xy,\;\; \hat\epsilon_k = M_Xy \qquad\qquad \hat y_{k+1}=P_{X_+}y,\;\;\hat\epsilon_{k+1}=M_{X_+}y$$
+
+$$
+\begin{flalign}
+&& P_X &= X(X^\top X)^{-1}X^\top,\quad M_X = I-P_X \qquad\text{(orthogonal projector onto col(X), its annihilator)} & \\
+&& \tilde x_{k+1} &= M_X x_{k+1} \qquad\text{(component of the new feature orthogonal to everything already in the model)} & \\
+&& \hat y_k &= P_{X}y & \\
+&& \hat\epsilon_k &= M_Xy \qquad\qquad \hat y_{k+1}=P_{X_+}y & \\
+&& \hat\epsilon_{k+1} &= M_{X_+}y
+\end{flalign}
+$$
 
 This single setup is reused without restatement in all three answers below — it is exactly the kind of shared
 scaffolding you're expected to set up *once*, out loud, in the first 30 seconds of a Citadel/Cubist quant interview,
@@ -35,52 +42,25 @@ before touching any of the three sub-questions.
 ### 🧮 First-Principles Derivation
 
 **Step 1 — Unbiasedness is preserved (this is the asymmetric twin of omitted-variable bias).**
-
 Because $\beta_{k+1}=0$ truly, $X_+$ contains the true model as a special case. OLS on the augmented design gives:
-
-$$
-\hat\beta_+ = (X_+^\top X_+)^{-1}X_+^\top y, \qquad \mathbb{E}[\hat\beta_+ \mid X_+] = (X_+^\top X_+)^{-1}X_+^\top \mathbb{E}[y\mid X_+] = (X_+^\top X_+)^{-1}X_+^\top X_+\beta_+ = \beta_+
-$$
-
-where:
-
-$$\beta_+ = (\beta^\top, 0)^\top$$
-
-So:
-
-$$\mathbb{E}[\hat\beta_j]=\beta_j$ for $j\le k$$
-
-**and**
-
-$$\mathbb{E}[\hat\beta_{k+1}]=0$$
-
-Contrast this with the *reverse* mistake ( omitting a relevant regressor $x_{k+1}$ that is correlated with $X$ ):
-
+$$\hat\beta_+ = (X_+^\top X_+)^{-1}X_+^\top y, \qquad \mathbb{E}[\hat\beta_+ \mid X_+] = (X_+^\top X_+)^{-1}X_+^\top \mathbb{E}[y\mid X_+] = (X_+^\top X_+)^{-1}X_+^\top X_+\beta_+ = \beta_+$$
+where $\beta_+ = (\beta^\top, 0)^\top$. So $\mathbb{E}[\hat\beta_j]=\beta_j$ for $j\le k$ **and** $\mathbb{E}[\hat\beta_{k+1}]=0$.
+Contrast this with the *reverse* mistake (omitting a relevant regressor $x_{k+1}$ that is correlated with $X$):
 $$\mathbb{E}[\hat\beta^{short}] = \beta + \delta\,\beta_{k+1}, \qquad \delta=(X^\top X)^{-1}X^\top x_{k+1}$$
-
-> Omission biases the kept coefficients (unless $\delta=0$); **inclusion of a useless feature never does.** This asymmetry is the whole point of the question.
->
+Omission biases the kept coefficients (unless $\delta=0$); **inclusion of a useless feature never does.** This
+asymmetry is the whole point of the question.
 
 **Step 2 — In-sample fit weakly improves, by construction, regardless of truth.**
-
-OLS minimizes $\|y-X_+\gamma\|^2$ over a strictly larger feasible set than $\|y-X\beta\|^2$ (set $\gamma_{k+1}=0$ to recover the smaller problem), so:
-
-$$
-RSS_{k+1} \le RSS_k \quad\Longrightarrow\quad R^2_{k+1}\ge R^2_k \quad\text{always, with equality iff } \tilde x_{k+1}^\top y = 0
-$$
-
-With continuous data this is a probability-zero event — **$R^2$ will go up even though the feature is genuinely useless.** This is the mechanical artifact that makes naive in-sample $R^2$ unusable as a feature-inclusion gate.
+OLS minimizes $\|y-X_+\gamma\|^2$ over a strictly larger feasible set than $\|y-X\beta\|^2$ (set $\gamma_{k+1}=0$ to
+recover the smaller problem), so:
+$$RSS_{k+1} \le RSS_k \quad\Longrightarrow\quad R^2_{k+1}\ge R^2_k \quad\text{always, with equality iff } \tilde x_{k+1}^\top y = 0$$
+With continuous data this is a probability-zero event — **$R^2$ will go up even though the feature is genuinely
+useless.** This is the mechanical artifact that makes naive in-sample $R^2$ unusable as a feature-inclusion gate.
 
 **Step 3 — Quantify the expected drop in residual sum of squares.**
-
-Since the model is correctly specified,
-
-$$\hat\epsilon_k = M_Xy = M_X\epsilon$$
-
-( the true signal is annihilated by $M_X$ ). Using $\tilde x_{k+1}^\top \hat y_k = 0$ (orthogonality of projections):
-
+Since the model is correctly specified, $\hat\epsilon_k = M_Xy = M_X\epsilon$ (the true signal is annihilated by
+$M_X$). Using $\tilde x_{k+1}^\top \hat y_k = 0$ (orthogonality of projections):
 $$\hat\beta_{k+1} = \frac{\tilde x_{k+1}^\top y}{\tilde x_{k+1}^\top \tilde x_{k+1}} = \frac{\tilde x_{k+1}^\top \epsilon}{\|\tilde x_{k+1}\|^2}, \qquad RSS_k-RSS_{k+1}=\hat\beta_{k+1}^2\,\|\tilde x_{k+1}\|^2 = \frac{(\tilde x_{k+1}^\top \epsilon)^2}{\|\tilde x_{k+1}\|^2}$$
-
 Conditioning on $X_+$, $\tilde x_{k+1}^\top\epsilon \sim N(0,\sigma^2\|\tilde x_{k+1}\|^2)$, so the quantity above is
 $\sigma^2\chi^2_1$, hence:
 $$\boxed{\mathbb{E}[RSS_k - RSS_{k+1}] = \sigma^2 \text{ exactly} }$$
@@ -100,11 +80,15 @@ $$\text{Var}(\hat\beta_j) = \frac{\sigma^2}{\|M_{X_{(-j)}}\,x_j\|^2}$$
 where $X_{(-j)}$ is *all other* regressors. Adding $x_{k+1}$ to that "all other regressors" set can only shrink
 $\|M_{X_{(-j)}}x_j\|^2$ (same nested-projection argument as Step 2, with $x_j$ now playing the role of $y$):
 $$\text{Var}(\hat\beta_j^{(k+1)\text{-model}}) \;\ge\; \text{Var}(\hat\beta_j^{(k)\text{-model}}) \qquad \text{for every } j\le k$$
-Equivalently, in VIF language: $\text{Var}(\hat\beta_j)=\dfrac{\sigma^2}{SST_j(1-R_j^2)}\cdot\text{VIF}_j$,
-$\text{VIF}_j=\frac{1}{1-R_j^2}$ where $R_j^2$ is from regressing $x_j$ on every other regressor. Adding $x_{k+1}$
-weakly raises $R_j^2$ for every existing $j$ ⇒ VIF rises ⇒ standard errors widen, $t$-stats shrink, confidence
-intervals balloon. **Equality (no damage to old coefficients) holds iff $X^\top x_{k+1}=0$ exactly** — the dead
-feature is orthogonal to the entire existing design.
+Equivalently, in VIF language — these are two equal ways of writing the *same* quantity, not one multiplied by
+the other:
+$$\text{Var}(\hat\beta_j)=\frac{\sigma^2}{SST_j(1-R_j^2)} \;=\; \frac{\sigma^2}{SST_j}\cdot\text{VIF}_j, \qquad \text{VIF}_j=\frac{1}{1-R_j^2}$$
+where $R_j^2$ is from regressing $x_j$ on every other regressor. Adding $x_{k+1}$ weakly raises $R_j^2$ for every
+existing $j$ ⇒ VIF rises ⇒ standard errors widen, $t$-stats shrink, confidence intervals balloon.
+**$X^\top x_{k+1}=0$ exactly is a sufficient condition for zero damage** — it leaves $\text{Var}(\hat\beta_j)$
+unchanged for *every* $j\le k$ simultaneously, because the dead feature is orthogonal to the entire existing
+design. (It is not narrowly necessary for any single $j$ in isolation — but generically, any nonzero correlation
+between $x_{k+1}$ and $X$ will strictly inflate at least one of the $k$ variances.)
 
 **Step 6 — Out-of-sample: the bias–variance decomposition flips sign on you.**
 Expected out-of-sample prediction error decomposes as $\text{MSE} = \text{Bias}^2+\text{Variance}+\sigma^2$. Step 1
@@ -116,18 +100,18 @@ Net effect: **in-sample $R^2$ ↑ (mechanically), out-of-sample $R^2$ ↓ (in ex
 of overfitting, derived here without invoking the word "overfitting" once.
 
 ```
-┌──────────────────────────┬─────────────────────┬──────────────────────────┐
-│ Quantity                 │ Adding RELEVANT x   │ Adding a DEAD feature    │
-│                          │ (omitted var. case) │ (this question)          │
-├──────────────────────────┼─────────────────────┼──────────────────────────┤
-│ Bias of kept β̂'s        │ Eliminated (was ≠0) │ Was already 0 — no chg   │
-│ Bias of new β̂_(k+1)     │ n/a (it's relevant) │ 0 (unbiased)             │
+┌──────────────────────────┬────────────────────┬─────────────────────────┐
+│ Quantity                 │ Adding RELEVANT x   │ Adding a DEAD feature   │
+│                          │ (omitted var. case) │ (this question)         │
+├──────────────────────────┼────────────────────┼─────────────────────────┤
+│ Bias of kept β̂'s         │ Eliminated (was ≠0) │ Was already 0 — no chg  │
+│ Bias of new β̂_(k+1)      │ n/a (it's relevant) │ 0 (unbiased)            │
 │ In-sample R² / RSS       │ ↑ / ↓ (real signal) │ ↑ / ↓ (pure noise pickup)│
-│ Var(β̂_j), j ≤ k         │ may ↑ or ↓          │ weakly ↑ (VIF)           │
-│ E[σ̂²]                   │ was biased, now OK  │ stays unbiased           │
-│ Var(σ̂²)                 │ improves (less bias)│ worsens (df loss)        │
-│ Out-of-sample performance│ improves            │ degrades in expectation  │
-└──────────────────────────┴─────────────────────┴──────────────────────────┘
+│ Var(β̂_j), j ≤ k          │ may ↑ or ↓          │ weakly ↑ (VIF)          │
+│ E[σ̂²]                    │ was biased, now OK  │ stays unbiased          │
+│ Var(σ̂²)                  │ improves (less bias)│ worsens (df loss)       │
+│ Out-of-sample performance│ improves            │ degrades in expectation │
+└──────────────────────────┴────────────────────┴─────────────────────────┘
 ```
 
 ---
@@ -206,12 +190,19 @@ Because $X_+=[X\;\;x_{k+1}]$, every linear combination of $X$'s columns is trivi
 $X_+$'s columns (just set the new coefficient to 0). So $\text{col}(X)$ is a $k$-dimensional subspace strictly
 nested inside the $(k+1)$-dimensional $\text{col}(X_+)$.
 
-**Step 3 — Pythagorean proof that $RSS_{k+1}\le RSS_k$ (the geometric version of Q01-Step2).**
-Decompose $y = \hat y_{k+1} + \hat\epsilon_{k+1}$ with $\hat\epsilon_{k+1}\perp\text{col}(X_+)$, and further
-decompose $\hat y_{k+1} = \hat y_k + (\hat y_{k+1}-\hat y_k)$. One can show $\hat y_{k+1}-\hat y_k = \hat\beta_{k+1}\tilde x_{k+1}\in\text{col}(X_+)$
-and it is orthogonal to $\hat y_k\in\text{col}(X)$ component-wise in the relevant sense — combined with
-$\hat\epsilon_{k+1}\perp \hat y_{k+1}-\hat y_k$ (both live in orthogonal pieces of the construction), the
-Pythagorean theorem on the right triangle $y,\hat y_k,\hat y_{k+1}$ gives:
+**Step 3 — Pythagorean proof that $RSS_{k+1}\le RSS_k$ (the geometric version of Q01-Step2), proved rigorously
+via the orthogonal-direct-sum projector identity — not asserted.**
+Because $\tilde x_{k+1}=M_Xx_{k+1}$ is, by construction, orthogonal to every vector in $\text{col}(X)$, the bigger
+column space splits as an **orthogonal direct sum**: $\text{col}(X_+)=\text{col}(X)\oplus\text{span}\{\tilde x_{k+1}\}$.
+For any orthogonal direct sum of subspaces $V=V_1\oplus V_2$ (with $V_1\perp V_2$), decomposing any vector
+uniquely into its $V_1$-component, $V_2$-component, and orthogonal remainder shows immediately that the projector
+onto $V$ is the **sum** of the individual projectors: $P_V=P_{V_1}+P_{V_2}$. Applying this with $V_1=\text{col}(X)$,
+$V_2=\text{span}\{\tilde x_{k+1}\}$:
+$$P_{X_+} \;=\; P_X + \frac{\tilde x_{k+1}\tilde x_{k+1}^\top}{\|\tilde x_{k+1}\|^2} \quad\Longrightarrow\quad \hat y_{k+1}=P_{X_+}y = \hat y_k + \underbrace{\frac{\tilde x_{k+1}^\top y}{\|\tilde x_{k+1}\|^2}\,\tilde x_{k+1}}_{=\;\hat\beta_{k+1}\tilde x_{k+1}}$$
+So $\hat y_{k+1}-\hat y_k=\hat\beta_{k+1}\tilde x_{k+1}$ **exactly** (this is also exactly the FWL coefficient from
+Step 4 below), and since $\tilde x_{k+1}\perp\text{col}(X)\ni\hat y_k$, this increment is orthogonal to $\hat y_k$
+by construction, not approximately. Combined with $\hat\epsilon_{k+1}\perp\text{col}(X_+)\supseteq\{\hat y_k,\,\hat y_{k+1}-\hat y_k\}$,
+the Pythagorean theorem on the right triangle $y,\hat y_k,\hat y_{k+1}$ gives:
 $$\|y-\hat y_k\|^2 = \|y-\hat y_{k+1}\|^2 + \|\hat y_{k+1}-\hat y_k\|^2 \quad\Longrightarrow\quad RSS_k = RSS_{k+1} + \underbrace{\hat\beta_{k+1}^2\|\tilde x_{k+1}\|^2}_{\ge 0}$$
 This is a **purely geometric** re-derivation of Q01-Step3 — moving to a bigger subspace can only shorten the
 distance to $y$ (or leave it unchanged), it can never lengthen it.
@@ -241,26 +232,26 @@ inside a space that is, by assumption, nothing but noise.**
 
 ```
    R^n  (the full n-dimensional data space)
-   ┌───────────────────────────────────────────────────────────┐
-   │                                                           │
-   │                         y                                 │
-   │                        ╱│                                 │
+   ┌──────────────────────────────────────────────────────────┐
+   │                                                          │
+   │                         y                                │
+   │                        ╱│                                │
    │                       ╱ │ ε_(k+1) = M_{X+}y               │
    │                      ╱  │ (⟂ col(X₊), lives in            │
    │                     ╱   │  (n-k-1)-dim complement)        │
-   │                    ╱    │                                 │
-   │             ŷ_(k+1) ────┘                                 │
-   │               ╱╲                                          │
-   │              ╱  ╲  β̂_(k+1)·x̃_(k+1)                       │
+   │                    ╱    │                                │
+   │             ŷ_(k+1) ────┘                                │
+   │               ╱╲                                         │
+   │              ╱  ╲  β̂_(k+1)·x̃_(k+1)                        │
    │             ╱    ╲ ("the extra direction" — 1-dim,        │
    │            ╱      ╲  ⟂ col(X), captured noise if H0 true) │
-   │           ╱        ╲                                      │
+   │           ╱        ╲                                     │
    │   ┌──────●──────────┴──────────────┐                      │
    │   │     ŷ_k = P_X y                │  col(X)  — k dims    │
    │   │   (closest point in col(X))    │  nested strictly     │
    │   └─────────────────────────────────┘  inside col(X₊)      │
-   │            col(X₊) = col(X) ⊕ span{x̃_(k+1)}  — k+1 dims    │
-   └───────────────────────────────────────────────────────────┘
+   │            col(X₊) = col(X) ⊕ span{x̃_(k+1)}  — k+1 dims   │
+   └──────────────────────────────────────────────────────────┘
 
    Pythagoras on the big right triangle (y, ŷ_k, ŷ_(k+1)):
        ‖y − ŷ_k‖² = ‖y − ŷ_(k+1)‖² + ‖ŷ_(k+1) − ŷ_k‖²
@@ -384,13 +375,13 @@ identical content to Step 2, just rescaled by the common factor $TSS$.
                                      orthogonal ⇒ independent
                                      chi-square pieces (Cochran)
 
-        ┌─────────────────────────────────────────────────────┐
-        │         (RSS_k − RSS_(k+1)) / 1                     │
+        ┌───────────────────────────────────────────────────┐
+        │         (RSS_k − RSS_(k+1)) / 1                    │
         │  F  =  ─────────────────────────────  ~  F_{1,n-k-1}│
         │           RSS_(k+1) / (n-k-1)                       │
-        └─────────────────────────────────────────────────────┘
+        └───────────────────────────────────────────────────┘
            "extra length² per new dimension you spent"
-        ───────────────────────────────────────────────────────
+         ───────────────────────────────────────────────────
            "leftover length² per dimension still unexplained"
 ```
 
@@ -412,12 +403,17 @@ whole new alternative-data bucket add anything jointly," as opposed to feature-b
 to within-bucket collinearity.
 
 **FU2 — "Relate the F-test to the likelihood ratio test."**
-Under Gaussian errors, $-2\log\Lambda = n\log(RSS_R/RSS_U)$ is the LRT statistic, asymptotically $\chi^2_q$. For
-finite $n$, $n\log(1+qF/(n-p_U))\approx -2\log\Lambda$ — the F-test is the *exact* finite-sample sibling of the
-LRT's asymptotic approximation; they agree to first order and coincide exactly as $n\to\infty$. This is why model-
-selection criteria built on likelihood (AIC/BIC) and hypothesis-testing criteria (F-test) tend to agree
-qualitatively but not numerically — AIC's implicit threshold is roughly $F>2$, not the conventional $F$-table
-$\alpha=0.05$ cutoff.
+Under Gaussian errors, $-2\log\Lambda = n\log(RSS_R/RSS_U)$ is the LRT statistic. Rearranging the definition of
+$F$ gives the algebraic identity $RSS_R/RSS_U = 1+qF/(n-p_U)$, so substituting yields an **exact** relationship
+between the two statistics, true for every finite $n$ — not an approximation:
+$$-2\log\Lambda \;=\; n\log\!\left(1+\frac{qF}{n-p_U}\right) \qquad \text{(exact, for all finite } n)$$
+The asymptotics enter only one level down, in the **reference distributions**: as $n\to\infty$ with $q$ fixed,
+$qF/(n-p_U)\to 0$, so $\log(1+x)\approx x$ gives $-2\log\Lambda\approx qF$, and since $F_{q,n-p_U}\to\chi^2_q/q$ in
+that limit, both statistics converge to the same $\chi^2_q$ law. So: the *statistics* are tied together exactly at
+any sample size; it is only the convergence of the *exact* $F_{q,n-p_U}$ distribution to the *asymptotic* $\chi^2_q$
+distribution that is a large-$n$ approximation. This is why model-selection criteria built on likelihood (AIC/BIC)
+and hypothesis-testing criteria (F-test) tend to agree qualitatively but not numerically — AIC's implicit
+threshold is roughly $F>2$, not the conventional $F$-table $\alpha=0.05$ cutoff.
 
 **FU3 — "What breaks the exact $F_{q,n-p}$ distribution, and what do you do instead?"**
 Heteroskedasticity or serial correlation in $\epsilon$ (the realistic case for daily macro/futures returns) breaks
@@ -449,5 +445,3 @@ re-run with Newey–West-robust standard errors (FU3) before it's allowed to inf
 that looks significant under classical assumptions but evaporates under HAC correction is one of the most common
 "this signal isn't real" red flags reviewed in pod signal-acceptance meetings, right alongside the CPCV /
 Deflated-Sharpe gate from Q01.
-
----
