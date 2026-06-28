@@ -529,7 +529,9 @@ $$IR = \frac{IC}{\sqrt{(1+IC^2)/N}} = IC\cdot\sqrt{N}\cdot\frac{1}{\sqrt{1+IC^2}
 
 **Step 5 — Take the small-IC limit.** Since $IC \ll 1$ for real signals (IC ≈ 0.02–0.10), $\sqrt{1+IC^2}\approx 1$, giving the **Grinold (1989) Fundamental Law of Active Management:**
 
-$$\boxed{IR \approx IC \cdot \sqrt{N}}$$
+|     |
+| :-- |
+| $`IR \approx IC \cdot \sqrt{N}`$ |
 
 where $N$ = **breadth** (number of *independent* bets). This single identity is why Trexquant's
 "thousands of signals across thousands of names" strategy works even though each individual IC is tiny:
@@ -832,7 +834,9 @@ $$\frac{\partial \mathcal{L}}{\partial \mathbf{w}} = \boldsymbol{\mu} - \eta\,\m
 
 **Step 6 — Drop the scale-irrelevant constant $1/\eta$** (since IR is scale-invariant, Step 3):
 
-$$\boxed{\mathbf{w}^{\*} = \mathbf{\Sigma}^{-1}\boldsymbol{\mu}}$$
+|     |
+| :-- |
+| $`\mathbf{w}^{\*} = \mathbf{\Sigma}^{-1}\boldsymbol{\mu}`$ |
 
 **Step 7 — Key identity: this is exactly the OLS regression coefficient of $\mathbf{r}$ on $\mathbf{F}$.**
 Since $\boldsymbol{\mu} = \mathbf{F}^\top\mathbf{r}/T$ and $\mathbf{\Sigma}=\mathbf{F}^\top\mathbf{F}/T$,
@@ -3970,10 +3974,17 @@ $$\text{Cov}(X, Y) = \mathbb{E}[(X - \mu_X)(Y - \mu_Y)]$$
 
 **Step 2 — Expand the product:**
 
-$$\text{Cov}(X,Y) = \mathbb{E}[XY - X\mu_Y - Y\mu_X + \mu_X\mu_Y]$$
-$$= \mathbb{E}[XY] - \mu_Y\mathbb{E}[X] - \mu_X\mathbb{E}[Y] + \mu_X\mu_Y$$
-$$= \mathbb{E}[XY] - \mu_X\mu_Y - \mu_X\mu_Y + \mu_X\mu_Y$$
-$$\boxed{\text{Cov}(X,Y) = \mathbb{E}[XY] - \mathbb{E}[X]\mathbb{E}[Y]}$$
+$$
+\begin{align}
+\text{Cov}(X,Y) = \mathbb{E} \lbrace XY - X\mu_Y - Y\mu_X + \mu_X \cdot \mu_Y \rbrace \\
+= \mathbb{E}[XY] - \mu_Y\mathbb{E}[X] - \mu_X\mathbb{E}[Y] + \mu_X \cdot \mu_Y \\
+= \mathbb{E}[XY] - \mu_X\mu_Y - \mu_X\mu_Y + \mu_X \cdot \mu_Y
+\end{align}
+$$
+
+|     |
+| :-- |
+| $`\text{Cov}(X,Y) = \mathbb{E}[XY] - \mathbb{E}[X]\mathbb{E}[Y]`$ |
 
 **Step 3 — Sample covariance (unbiased estimator).** Given samples $(x_1,y_1),\ldots,(x_n,y_n)$:
 
