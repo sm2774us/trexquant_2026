@@ -1696,12 +1696,11 @@ $$\mathbf{X}^\top\hat{\boldsymbol{\epsilon}} = \mathbf{X}^\top(\mathbf{I}-\mathb
 
 $$\text{Var}(\hat{\boldsymbol{\beta}}) = \sigma^2 (\mathbf{X}^\top\mathbf{X})^{-1}$$
 
-**Estimated variance** (plug in $\hat{\sigma}^2 = \|\hat{\boldsymbol{\epsilon}}\|^2 / (T-K)$):
+**Estimated variance** ( plug in $\hat{\sigma}^2 = \|\hat{\boldsymbol{\epsilon}}\|^2 / (T-K)$ ):
 
 $$\widehat{\text{Var}}(\hat{\boldsymbol{\beta}}) = \hat{\sigma}^2 (\mathbf{X}^\top\mathbf{X})^{-1}$$
 
-The standard error of $\hat{\beta}_j$ is $\sqrt{\hat{\sigma}^2 [(\mathbf{X}^\top\mathbf{X})^{-1}]_{jj}}$
-and the $t$-statistic is $\hat{\beta}_j / \text{SE}(\hat{\beta}_j)$.
+The standard error of $\hat{\beta}_j$ is $\sqrt{\hat{\sigma}^2 [(\mathbf{X}^\top\mathbf{X})^{-1}]_{jj}}$ and the $t$-statistic is $\hat{\beta}_j / \text{SE}(\hat{\beta}_j)$ .
 
 ---
 
