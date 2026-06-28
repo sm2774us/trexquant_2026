@@ -346,7 +346,12 @@ providing valid error control.
 2. Sort ascending: $p_{(1)} \leq p_{(2)} \leq \cdots \leq p_{(N)}$.
 3. Compute the harmonic correction constant: $c_N = \sum_{j=1}^{N} \frac{1}{j} \approx \ln N + 0.5772$
 4. For each $i$, compute the BHY threshold: $\alpha_i = \frac{i \cdot q}{N \cdot c_N}$
-5. Find $k = \max\left\{i : p_{(i)} \leq \frac{i \cdot q}{N \cdot c_N}\right\}$
+5. Find:
+
+$$
+k = \max \lbrace i : p_{(i)} \leq \frac{i \cdot q}{N \cdot c_N} \rbrace
+$$
+
 6. Reject all $H_{(1)}, H_{(2)}, \ldots, H_{(k)}$ (the $k$ most significant).
 
 The BHY procedure guarantees $E[\text{FDR}] \leq q$ under arbitrary correlation structure
