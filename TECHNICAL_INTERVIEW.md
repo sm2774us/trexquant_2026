@@ -3990,16 +3990,35 @@ $$
 
 $$\hat{\sigma}_{XY} = \frac{1}{n-1}\sum_{i=1}^n (x_i - \bar{x})(y_i - \bar{y})$$
 
-**Why divide by $n-1$?** We estimate the means $\bar{x}, \bar{y}$ from the same data, consuming
-one degree of freedom. The divisor $n-1$ (Bessel's correction) makes $\hat{\sigma}_{XY}$ an
-unbiased estimator of $\text{Cov}(X,Y)$:
+**Why divide by $n-1$?** We estimate the means $\bar{x}, \bar{y}$ from the same data, consuming one degree of freedom. The divisor $n-1$ (Bessel's correction) makes $\hat{\sigma}_{XY}$ an unbiased estimator of $\text{Cov}(X,Y)$:
 
 $$\mathbb{E}[\hat{\sigma}_{XY}] = \text{Cov}(X,Y)$$
 
-*Proof:* $\sum_i(x_i-\bar{x})(y_i-\bar{y}) = \sum_i x_i y_i - n\bar{x}\bar{y}$.
-Taking expectation: $\mathbb{E}[\sum x_i y_i] = n\mathbb{E}[XY]$. And
-$\mathbb{E}[n\bar{x}\bar{y}] = n(\text{Cov}(X,Y)/n + \mu_X\mu_Y) = \text{Cov}(X,Y) + n\mu_X\mu_Y$.
-So $\mathbb{E}[\text{numerator}] = (n-1)\text{Cov}(X,Y)$, and dividing by $n-1$ gives the unbiased result.
+*Proof:*
+
+$$
+\sum_i(x_i-\bar{x})(y_i-\bar{y}) = \sum_i x_i y_i - n\bar{x}\bar{y}
+$$
+
+Taking expectation:
+
+$$
+\mathbb{E}[\sum x_i y_i] = n\mathbb{E}[XY]
+$$
+
+And
+
+$$
+\mathbb{E}[n\bar{x}\bar{y}] = n(\text{Cov}(X,Y)/n + \mu_X\mu_Y) = \text{Cov}(X,Y) + n\mu_X\mu_Y
+$$
+
+So,
+
+$$
+\mathbb{E}[\text{numerator}] = (n-1)\text{Cov}(X,Y)
+$$
+
+and dividing by $n-1$ gives the unbiased result. $\tag*{$\blacksquare$}$
 
 **Step 4 — Pearson Correlation:**
 
