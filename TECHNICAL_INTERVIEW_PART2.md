@@ -21,11 +21,11 @@ $$U(\mathbf{w}) = \mathbf{w}^\top \boldsymbol{\mu} - \frac{\lambda}{2} \mathbf{w
 For a single risky asset with excess return $r_t = R_t - r_f$, the optimal weight satisfies
 $\partial U / \partial w = 0$:
 
-$$w^* = \frac{\mu}{\lambda \sigma^2}$$
+$$w^{\*} = \frac{\mu}{\lambda \sigma^2}$$
 
 The utility at the optimum is:
 
-$$U^* = \frac{\mu^2}{2\lambda\sigma^2} = \frac{1}{2\lambda} SR^2, \qquad SR \equiv \frac{\mu}{\sigma}$$
+$$U^{\*} = \frac{\mu^2}{2\lambda\sigma^2} = \frac{1}{2\lambda} SR^2, \qquad SR \equiv \frac{\mu}{\sigma}$$
 
 So **Sharpe² is twice the maximum achievable mean-variance utility per unit of risk aversion.**
 This is why it is the canonical ranking statistic for mean-variance investors.
@@ -756,9 +756,9 @@ The term $1$ is from variance estimation uncertainty, $-\hat{\gamma}_3 \hat{SR}$
 (negative skewness inflates the estimated SR distribution), and $(\hat{\gamma}_4-1)\hat{SR}^2/4$
 from fat tails.
 
-Therefore, for a benchmark $SR^*$:
+Therefore, for a benchmark $SR^{\*}$:
 
-$$\widehat{PSR}(SR^*) = \Phi\!\left(\frac{(\hat{SR} - SR^*)\sqrt{T-1}}{\sqrt{1 - \hat{\gamma}_3\hat{SR} + \frac{\hat{\gamma}_4 - 1}{4}\hat{SR}^2}}\right)$$
+$$\widehat{PSR}(SR^{\*}) = \Phi\!\left(\frac{(\hat{SR} - SR^{\*})\sqrt{T-1}}{\sqrt{1 - \hat{\gamma}_3\hat{SR} + \frac{\hat{\gamma}_4 - 1}{4}\hat{SR}^2}}\right)$$
 
 **Interpretation:** $\widehat{PSR}(0) = 0.95$ means "with 95% confidence, the true Sharpe is positive."
 
@@ -781,7 +781,7 @@ where $\gamma_E = 0.5772156649\ldots$ (Euler-Mascheroni constant) and $e = 2.718
 
 Scaling to per-observation Sharpe units:
 
-$$SR^*_{\max} \approx \frac{1}{\sqrt{T}}\left[(1-\gamma_E)\Phi^{-1}\!\left(1 - \frac{1}{N}\right) + \gamma_E \Phi^{-1}\!\left(1 - \frac{1}{Ne}\right)\right]$$
+$$SR^{\*}_{\max} \approx \frac{1}{\sqrt{T}}\left[(1-\gamma_E)\Phi^{-1}\!\left(1 - \frac{1}{N}\right) + \gamma_E \Phi^{-1}\!\left(1 - \frac{1}{Ne}\right)\right]$$
 
 **Numerical examples:**
 
@@ -802,7 +802,7 @@ For a fund that tested 100 strategies over 5 years, any strategy claiming SR < 0
 
 ### Step 3 — Deflated Sharpe Ratio
 
-$$DSR = \widehat{PSR}(SR^*_{\max})$$
+$$DSR = \widehat{PSR}(SR^{\*}_{\max})$$
 
 A strategy passes the DSR gate at level $\delta$ if $DSR > \delta$ (typically $\delta = 0.95$).
 
@@ -3008,13 +3008,13 @@ $$\max_{\mathbf{w}} \; \boldsymbol{\mu}^\top \mathbf{w} - \frac{\lambda}{2}\math
 
 **Closed-form solution:**
 
-$$\mathbf{w}^* = \frac{1}{\lambda}\boldsymbol{\Sigma}^{-1}\boldsymbol{\mu}$$
+$$\mathbf{w}^{\*} = \frac{1}{\lambda}\boldsymbol{\Sigma}^{-1}\boldsymbol{\mu}$$
 
 **Derivation:** Taking the gradient and setting to zero:
 
 $$\frac{\partial}{\partial\mathbf{w}}\left[\boldsymbol{\mu}^\top\mathbf{w} - \frac{\lambda}{2}\mathbf{w}^\top\boldsymbol{\Sigma}\mathbf{w}\right] = \boldsymbol{\mu} - \lambda\boldsymbol{\Sigma}\mathbf{w} = \mathbf{0}$$
 
-$$\Rightarrow \mathbf{w}^* = \frac{1}{\lambda}\boldsymbol{\Sigma}^{-1}\boldsymbol{\mu}$$
+$$\Rightarrow \mathbf{w}^{\*} = \frac{1}{\lambda}\boldsymbol{\Sigma}^{-1}\boldsymbol{\mu}$$
 
 ---
 
@@ -3127,9 +3127,9 @@ $$pb - pbf = (1-p) + (1-p)fb$$
 
 $$pb - (1-p) = fb[p + (1-p)] = fb$$
 
-$$f^* = \frac{pb - (1-p)}{b} = p - \frac{1-p}{b} = \frac{p(b+1) - 1}{b}$$
+$$f^{\*} = \frac{pb - (1-p)}{b} = p - \frac{1-p}{b} = \frac{p(b+1) - 1}{b}$$
 
-**Verify:** For fair coin ($p=0.5$, $b=1$): $f^* = (0.5 \times 2 - 1)/1 = 0$ — correct,
+**Verify:** For fair coin ($p=0.5$, $b=1$): $f^{\*} = (0.5 \times 2 - 1)/1 = 0$ — correct,
 Kelly says don't bet on a fair game.
 
 **Continuous case:** For returns $r \sim \mathcal{N}(\mu, \sigma^2)$, wealth $W_t = W_0 e^{(rf)T}$
@@ -3137,9 +3137,9 @@ where $r_f = \mu f - \frac{1}{2}f^2\sigma^2 + \ldots$ Maximize the expected log-
 
 $$g(f) = \mu f - \frac{1}{2}\sigma^2 f^2$$
 
-$$\frac{dg}{df} = \mu - \sigma^2 f = 0 \implies f^* = \frac{\mu}{\sigma^2} = SR \cdot \frac{1}{\sigma}$$
+$$\frac{dg}{df} = \mu - \sigma^2 f = 0 \implies f^{\*} = \frac{\mu}{\sigma^2} = SR \cdot \frac{1}{\sigma}$$
 
-**Half-Kelly** ($f = f^*/2$) trades 25% of the maximum long-run growth rate for a 75%
+**Half-Kelly** ($f = f^{\*}/2$) trades 25% of the maximum long-run growth rate for a 75%
 reduction in the variance of growth outcomes — nearly always preferred in practice
 because model misspecification would otherwise cause overbetting.
 
@@ -3447,7 +3447,7 @@ variance is $\mathbf{w}^\top \mathbf{C} \mathbf{w}$ where $\mathbf{C}$ is the IC
 
 **Optimal combination weights** (maximize combined ICIR):
 
-$$\mathbf{w}^* = \mathbf{C}^{-1} \boldsymbol{\mu}_{IC}$$
+$$\mathbf{w}^{\*} = \mathbf{C}^{-1} \boldsymbol{\mu}_{IC}$$
 
 This is the classic mean-variance solution in signal space. The combined ICIR is:
 
@@ -3460,7 +3460,7 @@ of $N$ signals with IC vector $\boldsymbol{\mu}_{IC}$ and cross-signal IC covari
 
 ### Empirical Bayes Shrinkage of IC Estimates (Pre-Combination)
 
-Before computing $\mathbf{w}^*$, shrink the IC vector per Q28:
+Before computing $\mathbf{w}^{\*}$, shrink the IC vector per Q28:
 
 $$\boldsymbol{\mu}_{IC}^{\text{EB}} = \frac{\tau^2}{\tau^2 + \sigma^2_{\hat{IC}}} \cdot \hat{\boldsymbol{\mu}}_{IC}$$
 

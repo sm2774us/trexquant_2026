@@ -2352,9 +2352,9 @@ and $\Omega(h) = \gamma J + \frac{1}{2}\lambda \sum_j w_j^2$ (tree complexity re
 
 The optimal weight for leaf $j$ is:
 
-$$w_j^* = -\frac{\sum_{i \in \text{leaf}_j} g_i}{\sum_{i \in \text{leaf}_j} H_i + \lambda}$$
+$$w_j^{\*} = -\frac{\sum_{i \in \text{leaf}_j} g_i}{\sum_{i \in \text{leaf}_j} H_i + \lambda}$$
 
-For squared loss, $H_i = 1$ for all $i$, so $w_j^* = -\bar{g}_j / (1 + \lambda)$ — proportional
+For squared loss, $H_i = 1$ for all $i$, so $w_j^{\*} = -\bar{g}_j / (1 + \lambda)$ — proportional
 to the mean residual in the leaf.
 
 ---
@@ -2594,7 +2594,7 @@ print("  relationships with returns (e.g., threshold effects in sentiment scores
 For any subset $S \subseteq \mathcal{F}$, define $v(S)$ as the model's expected prediction when
 only features in $S$ are known (others marginalized out):
 
-$$v(S) = \mathbb{E}[f(\mathbf{x}) \mid x_j = x_j^* \;\forall j \in S]$$
+$$v(S) = \mathbb{E}[f(\mathbf{x}) \mid x_j = x_j^{\*} \;\forall j \in S]$$
 
 **The Shapley value of feature $j$** is the average marginal contribution of $j$ across all
 possible orderings in which features are introduced:
@@ -4164,7 +4164,7 @@ print(f"  LW weights closer to truth  : {'✅ YES' if np.max(np.abs(w_lw - w_tru
 ```
 
 > "I use Ledoit-Wolf shrinkage in two places in production: signal combination weights
-> (solving $\mathbf{w}^* = \hat{\Sigma}^{-1}\boldsymbol{\mu}$) and risk attribution via
+> (solving $\mathbf{w}^{\*} = \hat{\Sigma}^{-1}\boldsymbol{\mu}$) and risk attribution via
 > the Barra factor covariance matrix. With 80 signals and 252-day rolling window (T/K < 4),
 > the raw sample covariance is so noisy that unconstrained weights oscillate violently month
 > to month. LW shrinkage reduced monthly weight turnover by 45% while improving OOS IR by 12%."
