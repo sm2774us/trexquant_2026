@@ -1726,7 +1726,7 @@ N variables   1%       5%      10%
 3             -4.29    -3.74   -3.45
 ```
 
-Reject $H_0$ (no cointegration) if ADF statistic $< $ critical value.
+Reject $H_0$ (no cointegration) if ADF statistic $\lt$ critical value.
 
 ---
 
