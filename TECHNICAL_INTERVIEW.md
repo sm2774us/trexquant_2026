@@ -3087,7 +3087,7 @@ $$\text{Var}(\bar{f}) \to \rho\sigma^2$$
 
 **The irreducible variance floor is determined by $\rho$, not $B$.** Once $B$ is large enough (typically $B \geq 200$ is sufficient for the $\sigma^2/B$ term to be negligible), adding more trees does not help. The only way to reduce variance further is to reduce $\rho$ — hence random feature subsampling.
 
-**Why random feature subsampling reduces $\rho$:** If at each split we sample $m$ out of $K$ features ($m = \lfloor\sqrt{K}\rfloor$ is standard), then two trees will use different feature combinations for their splits, producing different tree structures even on similar bootstrap samples. The correlation between trees drops from $\rho_{\text{full}} \approx 0.7$ to $\rho_{\text{random}} \approx 0.2 \, \text{–} \, 0.3$ , reducing asymptotic variance by $3\times$ .
+**Why random feature subsampling reduces $\rho$:** If at each split we sample $m$ out of $K$ features ($m = \lfloor\sqrt{K}\rfloor$ is standard), then two trees will use different feature combinations for their splits, producing different tree structures even on similar bootstrap samples. The correlation between trees drops from $\rho_{\text{full}} \approx 0.7$ to $\rho_{\text{random}} \approx 0.2 \text{–} 0.3$ , reducing asymptotic variance by $3\times$ .
 
 ---
 
