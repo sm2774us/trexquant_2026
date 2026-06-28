@@ -2,23 +2,30 @@
 
 ### Shared Setup & Notation (used throughout Q01–Q03)
 
-> True DGP: $y = X\beta + \epsilon$, $X$ is $n\times k$ full rank, $\epsilon \sim N(0,\sigma^2 I_n)$, independent of $X$.
-> This is the **correctly specified** $k$-feature model — no omitted variables, right functional form.
-> We then form the **augmented** design $X_+ = [X \;\; x_{k+1}]$ ($n\times(k+1)$, full rank, $x_{k+1}\notin\text{col}(X)$),
-> where $x_{k+1}$ is a feature you already know **does not work** — i.e. its *true* population coefficient is
-> $\beta_{k+1}=0$. The augmented model is therefore *also* correctly specified (it nests the truth with one
-> redundant parameter pinned at zero). Define:
+> True DGP:
+> * $y = X\beta + \epsilon$
+> * $X$ is $n\times k$ full rank
+> * $\epsilon \sim N(0,\sigma^2 I_n)$, independent of $X$
 >
-
-$$
-\begin{flalign}
-&& P_X &= X(X^\top X)^{-1}X^\top,\quad M_X = I-P_X \qquad\text{(orthogonal projector onto col(X), its annihilator)} & \\
-&& \tilde x_{k+1} &= M_X x_{k+1} \qquad\text{(component of the new feature orthogonal to everything already in the model)} & \\
-&& \hat y_k &= P_{X}y & \\
-&& \hat\epsilon_k &= M_Xy \qquad\qquad \hat y_{k+1}=P_{X_+}y & \\
-&& \hat\epsilon_{k+1} &= M_{X_+}y
-\end{flalign}
-$$
+> This is the **correctly specified** $k$-feature model — no omitted variables, right functional form.
+>
+> We then form the **augmented** design $X_+ = [X \;\; x_{k+1}]$ ( $n\times(k+1)$, full rank, $x_{k+1} \notin \text{col}(X)$ ),
+>
+> where $x_{k+1}$ is a feature you already know **does not work** — i.e. its *true* population coefficient is $\beta_{k+1}=0$.
+> The augmented model is therefore *also* correctly specified (it nests the truth with one redundant parameter pinned at zero).
+>
+> Define:
+>
+> $$
+> \begin{flalign}
+> && P_X &= X(X^\top X)^{-1}X^\top,\quad M_X = I-P_X \qquad\text{(orthogonal projector onto col(X), its annihilator)} & \\
+> && \tilde x_{k+1} &= M_X x_{k+1} \qquad\text{(component of the new feature orthogonal to everything already in the model)} & \\
+> && \hat y_k &= P_{X}y & \\
+> && \hat\epsilon_k &= M_Xy \qquad\qquad \hat y_{k+1}=P_{X_+}y & \\
+> && \hat\epsilon_{k+1} &= M_{X_+}y
+> \end{flalign}
+> $$
+>
 
 This single setup is reused without restatement in all three answers below — it is exactly the kind of shared
 scaffolding you're expected to set up *once*, out loud, in the first 30 seconds of a Citadel/Cubist quant interview,
