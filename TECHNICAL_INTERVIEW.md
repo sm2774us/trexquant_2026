@@ -1657,15 +1657,13 @@ $$\mathcal{L}(\boldsymbol{\beta}) = \|\mathbf{y} - \mathbf{X}\boldsymbol{\beta}\
 
 $$\mathcal{L}(\boldsymbol{\beta}) = \mathbf{y}^\top\mathbf{y} - 2\boldsymbol{\beta}^\top\mathbf{X}^\top\mathbf{y} + \boldsymbol{\beta}^\top\mathbf{X}^\top\mathbf{X}\boldsymbol{\beta}$$
 
-*(Note: $\mathbf{y}^\top\mathbf{X}\boldsymbol{\beta} = \boldsymbol{\beta}^\top\mathbf{X}^\top\mathbf{y}$ since it's a scalar.)*
+**(Note: $\mathbf{y}^\top\mathbf{X}\boldsymbol{\beta} = \boldsymbol{\beta}^\top\mathbf{X}^\top\mathbf{y}$ since it's a scalar.)**
 
 **Step 3 — Take the matrix gradient and set to zero:**
 
 $$\frac{\partial \mathcal{L}}{\partial \boldsymbol{\beta}} = -2\mathbf{X}^\top\mathbf{y} + 2\mathbf{X}^\top\mathbf{X}\boldsymbol{\beta} = \mathbf{0}$$
 
-*(Using matrix calculus identities: $\partial(\mathbf{a}^\top\boldsymbol{\beta})/\partial\boldsymbol{\beta} = \mathbf{a}$
-and $\partial(\boldsymbol{\beta}^\top\mathbf{A}\boldsymbol{\beta})/\partial\boldsymbol{\beta} = 2\mathbf{A}\boldsymbol{\beta}$
-for symmetric $\mathbf{A}$.)*
+**(Using matrix calculus identities: $\partial(\mathbf{a}^\top\boldsymbol{\beta})/\partial\boldsymbol{\beta} = \mathbf{a}$ and $\partial(\boldsymbol{\beta}^\top\mathbf{A}\boldsymbol{\beta})/\partial\boldsymbol{\beta} = 2\mathbf{A}\boldsymbol{\beta}$ for symmetric $\mathbf{A}$.)**
 
 **Step 4 — Rearrange to the Normal Equations:**
 
@@ -1673,7 +1671,9 @@ $$\mathbf{X}^\top\mathbf{X}\boldsymbol{\beta} = \mathbf{X}^\top\mathbf{y}$$
 
 **Step 5 — Solve (when $\mathbf{X}^\top\mathbf{X}$ is full rank, i.e., columns of $\mathbf{X}$ are linearly independent):**
 
-$$\boxed{\hat{\boldsymbol{\beta}}_{\text{OLS}} = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}}$$
+|     |
+| :-- |
+| $`\hat{\boldsymbol{\beta}}_{\text{OLS}} = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}`$ |
 
 **Step 6 — Verify it is a minimum, not a maximum or saddle.** The Hessian:
 
