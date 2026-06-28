@@ -3976,7 +3976,7 @@ $$\text{Cov}(X, Y) = \mathbb{E}[(X - \mu_X)(Y - \mu_Y)]$$
 
 $$
 \begin{flalign}
-&& \text{Cov}(X,Y) = \mathbb{E} \lbrace XY - X\mu_Y - Y\mu_X + \mu_X \cdot \mu_Y \rbrace & \\
+&& \text{Cov}(X,Y) &= \mathbb{E}[XY - X\mu_Y - Y\mu_X + \mu_X \cdot \mu_Y] & \\
 && &= \mathbb{E}[XY] - \mu_Y\mathbb{E}[X] - \mu_X\mathbb{E}[Y] + \mu_X \cdot \mu_Y & \\
 && &= \mathbb{E}[XY] - \mu_X\mu_Y - \mu_X\mu_Y + \mu_X \cdot \mu_Y &
 \end{flalign}
