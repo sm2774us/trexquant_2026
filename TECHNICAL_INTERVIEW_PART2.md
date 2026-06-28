@@ -34,7 +34,11 @@ This is why it is the canonical ranking statistic for mean-variance investors.
 
 $$SR_{\text{ann}} = \frac{\bar{r}_d - r_{f,d}}{\hat{\sigma}_d} \times \sqrt{252}$$
 
-where $\hat{\sigma}_d = \sqrt{\frac{1}{T-1}\sum_{t=1}^{T}(r_t - \bar{r})^2}$ is the sample standard deviation.
+where:
+
+$$\hat{\sigma}_d = \sqrt{\frac{1}{T-1}\sum_{t=1}^{T}(r_t - \bar{r})^2}$$
+
+is the sample standard deviation.
 
 The $\sqrt{252}$ factor follows from the IID assumption:
 $\sigma_{\text{annual}} = \sigma_{\text{daily}} \sqrt{252}$ (variance scales linearly, std scales as $\sqrt{T}$).
