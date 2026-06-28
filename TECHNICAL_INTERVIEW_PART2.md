@@ -3467,8 +3467,13 @@ signal $k$ to portfolio return in period $t$). Signal combination is:
 
 $$\alpha_{\text{combined}} = \sum_k w_k s_{k,t} = \mathbf{w}^\top \mathbf{s}_t$$
 
-The combined signal's expected IC is $\bar{IC}_{\text{comb}} = \mathbf{w}^\top \boldsymbol{\mu}_{IC}$ and
-variance is $\mathbf{w}^\top \mathbf{C} \mathbf{w}$ where $\mathbf{C}$ is the IC covariance matrix.
+The combined signal's expected IC is:
+
+$$
+\bar{IC}_{\text{comb}} = \mathbf{w}^\top \boldsymbol{\mu}_{IC}
+$$
+
+and variance is $\mathbf{w}^\top \mathbf{C} \mathbf{w}$ where $\mathbf{C}$ is the IC covariance matrix.
 
 **Optimal combination weights** (maximize combined ICIR):
 
