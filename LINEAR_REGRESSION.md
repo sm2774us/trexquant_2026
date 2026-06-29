@@ -245,17 +245,17 @@ $$
 \end{flalign}
 $$
 
-So $\hat y_{k+1}-\hat y_k=\hat\beta_{k+1}\tilde x_{k+1}$ **exactly** (this is also exactly the FWL coefficient from Step 4 below), and since $\tilde x_{k+1}\perp\text{col}(X)\ni\hat y_k$, this increment is orthogonal to $\hat y_k$ by construction, not approximately. Combined with $\hat\epsilon_{k+1}\perp\text{col}(X_+)\supseteq\{\hat y_k,\,\hat y_{k+1}-\hat y_k\}$, the Pythagorean theorem on the right triangle $y,\hat y_k,\hat y_{k+1}$ gives:
+So $\hat y_{k+1}-\hat y_k=\hat\beta_{k+1} \cdot \tilde x_{k+1}$ **exactly** (this is also exactly the FWL coefficient from Step 4 below), and since $\tilde x_{k+1}\perp\text{col}(X)\ni\hat y_k$, this increment is orthogonal to $\hat y_k$ by construction, not approximately. Combined with $\hat\epsilon_{k+1}\perp\text{col}(X_+)\supseteq\{\hat y_k,\,\hat y_{k+1}-\hat y_k\}$, the Pythagorean theorem on the right triangle $y,\hat y_k,\hat y_{k+1}$ gives:
 
 $$
-\|y-\hat y_k\|^2 = \|y-\hat y_{k+1}\|^2 + \|\hat y_{k+1}-\hat y_k\|^2 \quad\Longrightarrow\quad RSS_k = RSS_{k+1} + \underbrace{\hat\beta_{k+1}^2\|\tilde x_{k+1}\|^2}_{\ge 0}
+\|y-\hat y_k\|^2 = \|y-\hat y_{k+1}\|^2 + \|\hat y_{k+1}-\hat y_k\|^2 \quad\Longrightarrow\quad RSS_k = RSS_{k+1} + \underbrace{\hat\beta_{k+1}^2 \cdot \|\tilde x_{k+1}\|^2}_{\ge 0}
 $$
 
-This is a **purely geometric** re-derivation of Q01-Step3 — moving to a bigger subspace can only shorten the distance to $y$ (or leave it unchanged), it can never lengthen it.
+This is a **purely geometric** re-derivation of **[Q01-Step3](#q01--you-add-a-feature-you-already-know-doesnt-work--what-happens)** — moving to a bigger subspace can only shorten the distance to $y$ (or leave it unchanged), it can never lengthen it.
 
 **Step 4 — Frisch–Waugh–Lovell (FWL): what the "extra" direction actually is.**
 
-$\tilde x_{k+1}=M_Xx_{k+1}$ is the part of the new feature that is genuinely *new information* — everything about $x_{k+1}$ that was already spanned by $X$ has been projected away. FWL states that regressing $y$ on the full $X_+$ gives the *exact same* $\hat\beta_{k+1}$ as the simple univariate regression of $y$ on $\tilde x_{k+1}$ alone ( equivalently, of $\hat\epsilon_k$ on $\tilde x_{k+1}$, since $\tilde x_{k+1}\perp\text{col}(X)$ kills the $\hat y_k$ part of $y$ ):
+$\tilde x_{k+1} = M_X \cdot x_{k+1}$ is the part of the new feature that is genuinely *new information* — everything about $x_{k+1}$ that was already spanned by $X$ has been projected away. FWL states that regressing $y$ on the full $X_+$ gives the *exact same* $\hat\beta_{k+1}$ as the simple univariate regression of $y$ on $\tilde x_{k+1}$ alone ( equivalently, of $\hat\epsilon_k$ on $\tilde x_{k+1}$, since $\tilde x_{k+1} \perp \text{col}(X)$ kills the $\hat y_k$ part of $y$ ):
 
 $$
 \hat\beta_{k+1} = \frac{\tilde x_{k+1}^\top \hat\epsilon_k}{\|\tilde x_{k+1}\|^2}
@@ -348,17 +348,23 @@ Both models are fit by OLS on the *same* $n$ observations; the restricted model 
 **Step 2 — The F-statistic, and its decomposition into orthogonal "lengths."**
 
 $$
-F = \frac{(RSS_R - RSS_U)/q}{RSS_U/(n-p_U)} = \frac{(RSS_k-RSS_{k+1})/1}{RSS_{k+1}/(n-k-1)}
+\begin{aligned}
+F &= \frac{(RSS_R - RSS_U)/q}{RSS_U/(n-p_U)} \\
+&= \frac{(RSS_k-RSS_{k+1})/1}{RSS_{k+1}/(n-k-1)}
+\end{aligned}
 $$
 
-From Q02-Step3 and Q02-Diagram: the numerator's bracketed term is $\|\hat y_{k+1}-\hat y_k\|^2=\hat\beta_{k+1}^2\|\tilde x_{k+1}\|^2$ — the squared length of the **extra fitted vector**, living in the 1-dimensional space $\text{span}\{\tilde x_{k+1}\}$. The denominator's bracketed term is $RSS_{k+1}=\|\hat\epsilon_{k+1}\|^2$ — the squared length of the **final residual**, living in the $(n-k-1)$-dimensional orthogonal complement of $\text{col}(X_+)$. **These two subspaces are orthogonal to each other by construction** (one is exactly $\text{span}\{\tilde x_{k+1}\}$, the other is everything left over after also removing that span), so by Cochran's theorem applied to the Gaussian vector $\epsilon$, the numerator and denominator pieces are **statistically independent**.
+From **[Q02-Step3](#q02--geometric-interpretation) and **[Q02-Diagram](#q02--geometric-interpretation): the numerator's bracketed term is $\|\hat y_{k+1}-\hat y_k\|^2=\hat\beta_{k+1}^2\|\tilde x_{k+1}\|^2$ — the squared length of the **extra fitted vector**, living in the 1-dimensional space $\text{span}\{\tilde x_{k+1}\}$. The denominator's bracketed term is $RSS_{k+1}=\|\hat\epsilon_{k+1}\|^2$ — the squared length of the **final residual**, living in the $(n-k-1)$-dimensional orthogonal complement of $\text{col}(X_+)$. **These two subspaces are orthogonal to each other by construction** (one is exactly $\text{span}\{\tilde x_{k+1}\}$, the other is everything left over after also removing that span), so by Cochran's theorem applied to the Gaussian vector $\epsilon$, the numerator and denominator pieces are **statistically independent**.
 
 **Step 3 — Distribution under $H_0$.**
 
 Under $H_0$, both pieces are pure noise: $(RSS_k-RSS_{k+1})\sim\sigma^2\chi^2_1$ (Q01-Step3) and $RSS_{k+1}\sim\sigma^2\chi^2_{n-k-1}$ (Q01-Step4), independent of each other. A ratio of two independent $\chi^2$ variables, each divided by its own degrees of freedom, is by *definition* an $F$ random variable:
 
 $$
-F = \frac{\chi_1^2/1}{\chi^2_{n-k-1}/(n-k-1)} \;\sim\; F_{1,\,n-k-1}
+\begin{aligned}
+F &= \frac{\chi_1^2/1}{\chi^2_{n-k-1}/(n-k-1)} \\
+&\sim F_{1,\,n-k-1}
+\end{aligned}
 $$
 
 $\mathbb{E}[F]=\frac{n-k-1}{n-k-3}\approx 1$ for reasonably large $n-k$ — **exactly the "centered near 1" intuition from the opener, derived rigorously.** Note this exact finite-sample result needs Gaussian, i.i.d., homoskedastic errors independent of $X$; absent normality, $q\cdot F\to\chi^2_q$ asymptotically by the CLT, which is the basis for robust/asymptotic Wald tests when those assumptions fail.
