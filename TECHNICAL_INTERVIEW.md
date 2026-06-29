@@ -1762,8 +1762,19 @@ $$
 \hat{\mathbf{y}} = \mathbf{P}_{\mathbf{X}}\mathbf{y}$
 $$
 
-* The matrix $\mathbf{P}_{\mathbf{X}}$ is idempotent ( $\mathbf{P}_{\mathbf{X}}^2 = \mathbf{P}_{\mathbf{X}}$ ) and symmetric
-* The vector of residuals is $\hat{\boldsymbol{\epsilon}} = \mathbf{y} - \hat{\mathbf{y}} = \mathbf{y} - \mathbf{P}_{\mathbf{X}}\mathbf{y} = (\mathbf{I} - \mathbf{P}_{\mathbf{X}})\mathbf{y}$
+The matrix:
+
+$$
+\mathbf{P}_{\mathbf{X}}
+$$ 
+
+is idempotent ( $\mathbf{P}_{\mathbf{X}}^2 = \mathbf{P}_{\mathbf{X}}$ ) and symmetric
+
+The vector of residuals is:
+
+$$
+\hat{\boldsymbol{\epsilon}} = \mathbf{y} - \hat{\mathbf{y}} = \mathbf{y} - \mathbf{P}_{\mathbf{X}}\mathbf{y} = (\mathbf{I} - \mathbf{P}_{\mathbf{X}})\mathbf{y}
+$$
 
 To prove the residuals are strictly orthogonal to the feature space, we check the dot product $\mathbf{X}^\top\hat{\boldsymbol{\epsilon}}$ :
 
