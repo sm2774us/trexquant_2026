@@ -445,7 +445,9 @@ Same picture, but the numerator subspace is now $q$-dimensional ($\text{span}\{\
 Under Gaussian errors, $-2\log\Lambda = n\log(RSS_R/RSS_U)$ is the LRT statistic. Rearranging the definition of $F$ gives the algebraic identity $RSS_R/RSS_U = 1+qF/(n-p_U)$, so substituting yields an **exact** relationship between the two statistics, true for every finite $n$ — not an approximation:
 
 $$
--2\log\Lambda \;=\; n\log\!\left(1+\frac{qF}{n-p_U}\right) \qquad \text{(exact, for all finite } n)
+\begin{aligned}
+-2\log\Lambda &= n \cdot \log\!\left(1+\frac{qF}{n-p_U}\right) \qquad \text{(exact, for all finite } n)
+\end{aligned}
 $$
 
 The asymptotics enter only one level down, in the **reference distributions**: as $n\to\infty$ with $q$ fixed, $qF/(n-p_U)\to 0$, so $\log(1+x)\approx x$ gives $-2\log\Lambda\approx qF$, and since $F_{q,n-p_U}\to\chi^2_q/q$ in that limit, both statistics converge to the same $\chi^2_q$ law. So: the *statistics* are tied together exactly at any sample size; it is only the convergence of the *exact* $F_{q,n-p_U}$ distribution to the *asymptotic* $\chi^2_q$ distribution that is a large-$n$ approximation. This is why model-selection criteria built on likelihood (AIC/BIC) and hypothesis-testing criteria (F-test) tend to agree qualitatively but not numerically — AIC's implicit threshold is roughly $F>2$, not the conventional $F$-table $\alpha=0.05$ cutoff.
