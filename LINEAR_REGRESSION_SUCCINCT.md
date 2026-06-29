@@ -203,7 +203,7 @@ $$F = \frac{||\mathbf{P_{M_X z}} \mathbf{y}||^2 / 1}{||\mathbf{e}_{new}||^2 / (n
 * *Q: How does the F-test relate to the t-test for a single coefficient?*
 * **A:** When testing a single restriction ($q=1$), the F-statistic is mathematically identical to the square of the t-statistic ($F = t^2$). The t-test checks if the coefficient is far from zero scaled by its standard error; the F-test checks if the variance explained by the subspace is large relative to the noise variance.
 
-* *Q: What if we added a block of $m$ useless features instead of just one?*
+* **Q: What if we added a block of $m$ useless features instead of just one?**
 * **A:** The geometry remains the same, but the new orthogonal subspace is $m$-dimensional. The numerator becomes the squared length of the projection onto this $m$-dimensional subspace divided by $m$. The denominator loses $m$ degrees of freedom instead of 1.
 
 **The Systematic Macro Pod Context:**
