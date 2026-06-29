@@ -254,87 +254,2018 @@ STAGE       ACTION                              KEY QUESTION
 
 **Illustrate step by step:**
 
-**Step 1 — Hypothesis:** Short-sellers who report positions on SEC 13F-2 (short disclosure) form clusters
-of informed bearish positioning. Stocks with recent increases in disclosed short interest relative to
-float should underperform over the next 20 days.
+### Phase 1: Signal Genesis
 
-**Step 2 — Data:** Pull SEC EDGAR short disclosures (filed within 1 business day of threshold crossing).
-Critical: use filing date, not position date. Avoids look-ahead bias.
+The objective is to isolate alpha through a systematic, falsifiable method, avoiding the "data mining" trap.
 
-**Step 3 — Feature:**
+1. **Hypothesis Formulation:** Every signal must begin with an economic rationale—not a data correlation. We target market microstructure inefficiencies, risk premia, or behavioral biases.
+
+2. **Point-in-Time (PIT) Data Integrity:** We ensure all data is aligned to the *knowledge time* (e.g., using filing dates for SEC disclosures, not position dates) to eliminate look-ahead bias.
+
+3. **Feature Engineering:** Raw data is transformed into stationary, dimensionless features:
+* **Class-Specific Volatility Scaling:** We use estimators tailored to the asset's dynamics: **GARCH(1,1)** for FX pairs, **EWMA ($\lambda=0.94$)** for Equities, and **HAR-RV** for Futures.
+* **Normalization:** We apply robust Z-scoring (Median/MAD) and winsorization ($3\sigma$) to mitigate the impact of extreme outliers.
+* **Stationarity:** We confirm features are mean-reverting via the **Augmented Dickey-Fuller (ADF) test**.
+
+### Phase 2: Orthogonalization
+
+We ensure the new signal adds unique marginal information to the existing portfolio library.
+
+1. **Gram-Schmidt Orthogonalization:** We residualize the new candidate signal ($\alpha_{raw}$) against our existing factor library $\{F_1, \dots, F_n\}$:
 
 $$
-\text{ShortMomentum}_i = \frac{\Delta\text{SI}_{i,t} - \mu_{\Delta\text{SI}}}{\sigma_{\Delta\text{SI}}} \quad \text{(cross-sectional z-score)}
+\alpha_{resid} = \alpha_{raw} - \sum_{j=1}^{n} \frac{\langle \alpha_{raw}, F_j \rangle}{\langle F_j, F_j \rangle} F_j
 $$
 
-Neutralize by sector. Winsorize at 3σ to avoid extreme outliers in thin stocks.
+2. **Noise Filtering:** We apply **Eigenvalue Decomposition** to the signal correlation matrix. Using the **Marčenko-Pastur Law**, we identify the "noise floor" eigenvalues and discard components that capture stochastic noise rather than genuine predictive signal.
 
-**Step 4 — Validation:** Walk-forward, re-train monthly, 252-day OOS window per fold.
+### Phase 3: Robustness & Validation
 
-**Step 5 — Stats:** Target $|t| > 2.5$, IC > 0.04, Deflated Sharpe > 1.0.
+We treat backtesting as a statistical stress test, not a performance search.
 
-**Step 6 — Combination:** Run Gram-Schmidt to verify signal is not collinear with existing
-price-momentum factor in library. Marginal IR contribution > 0.05 required.
+1. **Purged & Embargoed Cross-Validation (CPCV):** We purge observations that overlap with the testing window and apply an "embargo" period after the test set to account for serial correlation.
+2. **Deflated Sharpe Ratio (DSR):** We calculate DSR to account for the multiple testing bias ($N$ trials) and the distribution of Sharpe Ratios observed during the development phase.
+3. **Decay Profiling:** We model the signal's Information Coefficient (IC) as an **Ornstein-Uhlenbeck process**. If the rate of reversion ($\kappa$) suggests the edge decays faster than our transaction costs, the signal is discarded.
+
+### Phase 4: Portfolio Construction & Execution
+
+Alpha is meaningless if it cannot be captured net-of-costs.
+
+1. **Ledoit-Wolf Shrinkage:** To stabilize the portfolio covariance matrix ($\Sigma$) against high-dimensional noise, we shrink toward a constant correlation target:
+
+$$
+\Sigma_{LW} = \delta F + (1 - \delta) \Sigma_{emp}
+$$
+
+2. **Fractional Kelly Sizing:** We optimize for long-term growth by sizing trades at a fraction ($f < 1$) of the theoretical Kelly criterion, maintaining a buffer against drawdown: $w^* = f \cdot \frac{\mu}{\sigma^2}$.
+
+3. **Execution Gate (Kyle’s Lambda & Almgren-Chriss):**
+* **Kyle’s Lambda ($\lambda$):** We measure liquidity as price impact per unit volume ( $\lambda = \Delta P / \Delta Q$ ).
+* **Almgren-Chriss:** For large orders, we derive the optimal execution trajectory to balance slippage against market risk. If the expected alpha $\mathbb{E}[\alpha]$ is less than the projected market impact $(\lambda \cdot Q)$, the trade is rejected.
 
 ### 💻 Full Implementation — End-to-End Signal Construction Pipeline
 
 ```python
+"""End-to-end systematic alpha-signal research pipeline with integrated visualisations.
+
+This module implements the four-phase institutional research workflow used to
+take a candidate signal from raw point-in-time (PIT) data through to an
+execution-ready, portfolio-sized position:
+
+    Phase 1 -- Signal Genesis:        PIT alignment, asset-class-specific
+                                       volatility scaling, robust
+                                       normalization, and stationarity
+                                       confirmation (ADF test).
+    Phase 2 -- Orthogonalization:     Gram-Schmidt residualization against an
+                                       existing factor library, plus
+                                       Marcenko-Pastur eigenvalue denoising of
+                                       the signal correlation matrix.
+    Phase 3 -- Robustness/Validation: Purged & embargoed walk-forward
+                                       cross-validation (CPCV) of the
+                                       Information Coefficient (IC), Deflated
+                                       Sharpe Ratio (DSR) correction for
+                                       multiple testing, and Ornstein-
+                                       Uhlenbeck (OU) decay profiling of the
+                                       IC time series.
+    Phase 4 -- Portfolio/Execution:   Ledoit-Wolf constant-correlation
+                                       covariance shrinkage, fractional-Kelly
+                                       position sizing, and a Kyle's-Lambda /
+                                       Almgren-Chriss execution gate.
+
+Production-quality Plotly visualisations are generated automatically after
+the pipeline completes.  Five charts land in ``outputs/``:
+
+    phase1_signal_genesis.png
+    phase2_orthogonalization.png
+    phase3_validation.png
+    phase4_portfolio.png
+    summary_dashboard.png
+
+Every chart is built to the visual standard expected at a tier-1 quant shop:
+  - Consistent dark-slate theme with a single high-contrast accent palette
+  - No chart-junk; every ink pixel earns its place
+  - Self-contained: call ``generate_all_plots(results)`` with the dict
+    returned by ``run_pipeline()`` and the PNGs land in ``outputs/``.
+
+The synthetic example at the bottom of this module (``main()``) runs the
+short-interest-momentum signal from the original prototype through all four
+phases, prints diagnostics at every stage, and persists all five charts.
+
+Typical usage example:
+
+    $ python alpha_pipeline.py
 """
-Full pipeline implementing Steps 2-5 above on synthetic short-interest data:
-point-in-time alignment, cross-sectional z-scoring + sector neutralization,
-winsorization, and walk-forward IC evaluation.
-"""
+
+from __future__ import annotations
+
+import dataclasses
+import os
+import warnings
+from typing import Optional, Sequence
+
 import numpy as np
 import pandas as pd
+from scipy import stats
+from scipy.optimize import minimize
 from scipy.stats import spearmanr
+from statsmodels.tsa.stattools import adfuller
+import plotly.graph_objects as go
+import plotly.figure_factory as ff
+from plotly.subplots import make_subplots
 
-rng = np.random.default_rng(11)
-n_stocks, n_days, n_sectors = 400, 1000, 8
-sectors = rng.integers(0, n_sectors, n_stocks)
+# Suppress expected RuntimeWarnings when taking nanmean of all-NaN rows (PIT lag)
+warnings.filterwarnings("ignore", message="Mean of empty slice")
 
-# Simulate raw point-in-time short-interest deltas (filing-date aligned) and forward returns.
-# Inject a genuine but noisy relationship: high short-interest momentum -> lower fwd return.
-raw_signal = rng.normal(0, 1, (n_days, n_stocks))
-true_ic = 0.05
-fwd_ret = -true_ic * raw_signal + rng.normal(0, np.sqrt(1 - true_ic**2), (n_days, n_stocks))
+EULER_MASCHERONI = 0.5772156649015329
 
-def winsorize(x, k=3.0):
-    mu, sd = np.nanmean(x), np.nanstd(x)
-    return np.clip(x, mu - k * sd, mu + k * sd)
 
-def sector_neutral_zscore(x_row, sectors, n_sectors):
-    z = np.zeros_like(x_row)
-    for s in range(n_sectors):
-        mask = sectors == s
-        if mask.sum() > 1:
-            z[mask] = (x_row[mask] - x_row[mask].mean()) / (x_row[mask].std() + 1e-9)
-    return z
+# --------------------------------------------------------------------------- #
+# Design system
+# --------------------------------------------------------------------------- #
+BG          = "#0D1117"   # near-black canvas
+PANEL       = "#161B22"   # slightly lighter card background
+GRID        = "#21262D"   # very subtle grid lines
+BORDER      = "#30363D"   # axis / border colour
+TEXT_PRI    = "#E6EDF3"   # primary labels
+TEXT_SEC    = "#8B949E"   # secondary / annotation text
 
-ics, embargo, fold_len = [], 21, 126
-for t0 in range(252, n_days - fold_len - embargo, fold_len):
-    test_slice = slice(t0 + embargo, t0 + embargo + fold_len)
-    for t in range(test_slice.start, test_slice.stop):
-        feat = winsorize(raw_signal[t])
-        feat = sector_neutral_zscore(feat, sectors, n_sectors)
-        ic, _ = spearmanr(feat, fwd_ret[t])
-        ics.append(ic)
+# Accent palette (six distinct, accessible colours)
+TEAL        = "#58A6FF"   # primary highlight
+GOLD        = "#F0A500"   # secondary / warning
+GREEN       = "#3FB950"   # positive / pass
+RED         = "#F85149"   # negative / fail
+PURPLE      = "#BC8CFF"   # tertiary / eigenvalue
+ORANGE      = "#FFA657"   # execution / cost
 
-ics = np.array(ics)
-t_stat = ics.mean() / ics.std(ddof=1) * np.sqrt(len(ics))
-print(f"Walk-forward folds evaluated: {len(ics)} daily OOS observations")
-print(f"Mean Rank IC = {ics.mean():.4f}   IC std = {ics.std():.4f}")
-print(f"ICIR = {ics.mean()/ics.std():.3f}   t-stat = {t_stat:.2f}")
+FONT_FAMILY = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
+
+OUTPUT_DIR  = "outputs"
+
+
+# --------------------------------------------------------------------------- #
+# Phase 1: Signal Genesis
+# --------------------------------------------------------------------------- #
+class VolatilityScaler:
+    """Asset-class-specific volatility estimators used for feature scaling.
+
+    Each estimator converts a raw return (or signal innovation) series into a
+    dimensionless, vol-scaled series so that signals from heterogeneous asset
+    classes can be compared on a common footing before cross-sectional
+    z-scoring.
+
+    This class holds no state; every method is a pure function of its inputs
+    and is exposed as a ``staticmethod`` for that reason.
+    """
+
+    @staticmethod
+    def garch_11(returns: np.ndarray) -> np.ndarray:
+        """Fits a GARCH(1,1) model by maximum likelihood and returns sigma_t.
+
+        Used for FX pairs, where volatility clustering is strong and mean
+        reversion of variance is well approximated by a first-order GARCH
+        process: sigma_t^2 = omega + alpha * r_{t-1}^2 + beta * sigma_{t-1}^2.
+
+        Args:
+            returns: 1-D array of mean-zero return innovations, shape (T,).
+
+        Returns:
+            1-D array of shape (T,) holding the fitted conditional volatility
+            sigma_t (NOT variance) at every time step.
+        """
+        returns = np.asarray(returns, dtype=float)
+        var_target = np.var(returns)
+
+        def neg_log_likelihood(params: np.ndarray) -> float:
+            omega, alpha, beta = params
+            n = len(returns)
+            sigma2 = np.empty(n)
+            sigma2[0] = var_target
+            for t in range(1, n):
+                sigma2[t] = omega + alpha * returns[t - 1] ** 2 + beta * sigma2[t - 1]
+            sigma2 = np.maximum(sigma2, 1e-12)
+            log_lik = -0.5 * np.sum(np.log(2 * np.pi * sigma2) + returns ** 2 / sigma2)
+            return -log_lik
+
+        x0 = np.array([0.05 * var_target, 0.05, 0.90])
+        bounds = [(1e-10, None), (1e-6, 1 - 1e-6), (1e-6, 1 - 1e-6)]
+        result = minimize(neg_log_likelihood, x0, bounds=bounds, method="L-BFGS-B")
+        omega, alpha, beta = result.x
+
+        n = len(returns)
+        sigma2 = np.empty(n)
+        sigma2[0] = var_target
+        for t in range(1, n):
+            sigma2[t] = omega + alpha * returns[t - 1] ** 2 + beta * sigma2[t - 1]
+        return np.sqrt(np.maximum(sigma2, 1e-12))
+
+    @staticmethod
+    def ewma(returns: np.ndarray, lam: float = 0.94) -> np.ndarray:
+        """Computes a RiskMetrics-style EWMA volatility path.
+
+        Used for Equities. sigma_t^2 = lambda * sigma_{t-1}^2
+        + (1 - lambda) * r_{t-1}^2.
+
+        Args:
+            returns: 1-D array of mean-zero return innovations, shape (T,).
+            lam: EWMA decay factor. Defaults to 0.94 (the RiskMetrics daily
+                standard).
+
+        Returns:
+            1-D array of shape (T,) holding the fitted conditional volatility
+            sigma_t (NOT variance) at every time step.
+        """
+        returns = np.asarray(returns, dtype=float)
+        sigma2 = np.empty(len(returns))
+        sigma2[0] = returns[0] ** 2
+        for t in range(1, len(returns)):
+            sigma2[t] = lam * sigma2[t - 1] + (1 - lam) * returns[t - 1] ** 2
+        return np.sqrt(sigma2)
+
+    @staticmethod
+    def har_rv(realized_vol: np.ndarray) -> np.ndarray:
+        """Fits a HAR-RV model and returns the in-sample fitted RV path.
+
+        Used for Futures. Regresses today's realized volatility on yesterday's
+        (daily), the trailing 5-day average (weekly), and the trailing 22-day
+        average (monthly) realized volatility -- the Corsi (2009)
+        Heterogeneous Autoregressive model of Realized Volatility.
+
+        Args:
+            realized_vol: 1-D array of realized volatility observations,
+                shape (T,). Must have T > 22.
+
+        Returns:
+            1-D array of shape (T,) holding the HAR-RV fitted values. The
+            first 22 entries (insufficient history for the monthly lag) are
+            back-filled with the first valid fitted value.
+
+        Raises:
+            ValueError: If fewer than 23 observations are supplied.
+        """
+        rv = np.asarray(realized_vol, dtype=float)
+        if len(rv) <= 22:
+            raise ValueError("har_rv requires more than 22 observations.")
+
+        n = len(rv)
+        rv_d = rv[21:n - 1]
+        rv_w = np.array([rv[t - 5:t].mean() for t in range(21, n - 1)])
+        rv_m = np.array([rv[t - 22:t].mean() for t in range(21, n - 1)])
+        target = rv[22:n]
+
+        design = np.column_stack([np.ones_like(rv_d), rv_d, rv_w, rv_m])
+        coeffs, _, _, _ = np.linalg.lstsq(design, target, rcond=None)
+        fitted = design @ coeffs
+
+        out = np.empty(n)
+        out[22:] = fitted
+        out[:22] = fitted[0]
+        return out
+
+
+@dataclasses.dataclass
+class SignalGenesisConfig:
+    """Configuration for :class:`SignalGenesis`.
+
+    Attributes:
+        n_stocks: Cross-sectional universe size.
+        n_days: Number of daily observations to simulate.
+        n_sectors: Number of GICS-style sector buckets used for neutralization.
+        asset_class: One of {"fx", "equity", "futures"}; selects which
+            :class:`VolatilityScaler` estimator is used in
+            :meth:`SignalGenesis.scale_by_volatility`.
+        true_ic: The genuine (noisy) rank-IC baked into the synthetic data
+            generating process, used only for the illustrative example.
+        filing_lag: Number of days between the economic event and its public
+            disclosure (e.g. FINRA short-interest settlement lag). Features
+            are only allowed to use information dated at or before
+            ``t - filing_lag`` relative to the trade date ``t``, enforcing
+            point-in-time integrity.
+        seed: PRNG seed for reproducibility.
+    """
+
+    n_stocks: int = 400
+    n_days: int = 1000
+    n_sectors: int = 8
+    asset_class: str = "equity"
+    true_ic: float = 0.05
+    filing_lag: int = 2
+    seed: int = 11
+
+
+class SignalGenesis:
+    """Phase 1: turns raw point-in-time data into a stationary, neutral feature.
+
+    Encapsulates: (a) PIT-safe data simulation, (b) asset-class-specific
+    volatility scaling, (c) robust Median/MAD z-scoring with winsorization,
+    (d) sector neutralization, and (e) an ADF stationarity check.
+
+    Attributes:
+        config: The :class:`SignalGenesisConfig` driving this instance.
+        sectors: 1-D integer array of shape (n_stocks,) mapping each name to
+            a sector id in [0, n_sectors).
+    """
+
+    def __init__(self, config: SignalGenesisConfig):
+        """Initializes the generator and assigns a fixed sector mapping.
+
+        Args:
+            config: Simulation and feature-engineering configuration.
+
+        Returns:
+            None.
+        """
+        self.config = config
+        rng = np.random.default_rng(config.seed)
+        self.sectors = rng.integers(0, config.n_sectors, config.n_stocks)
+        self._rng = rng
+
+    def simulate_point_in_time_data(self) -> tuple[np.ndarray, np.ndarray]:
+        """Simulates a PIT-aligned raw signal and its forward return.
+
+        Injects a genuine but noisy relationship (high signal -> lower
+        forward return) at the configured ``true_ic``, then applies a
+        ``filing_lag``-step shift to the signal so that the value "known" on
+        day t was actually only filed/disclosed on day t - filing_lag. The
+        first ``filing_lag`` rows are therefore unusable (NaN) -- exactly as
+        a real PIT-aligned panel would be at the start of history.
+
+        Returns:
+            A tuple ``(raw_signal_pit, fwd_ret)`` of two 2-D arrays, each of
+            shape (n_days, n_stocks). ``raw_signal_pit`` has its first
+            ``filing_lag`` rows set to NaN.
+        """
+        cfg = self.config
+        raw_signal = self._rng.normal(0, 1, (cfg.n_days, cfg.n_stocks))
+        fwd_ret = (
+            -cfg.true_ic * raw_signal
+            + self._rng.normal(
+                0, np.sqrt(1 - cfg.true_ic ** 2), (cfg.n_days, cfg.n_stocks)
+            )
+        )
+
+        raw_signal_pit = np.full_like(raw_signal, np.nan)
+        if cfg.filing_lag > 0:
+            raw_signal_pit[cfg.filing_lag:] = raw_signal[: -cfg.filing_lag]
+        else:
+            raw_signal_pit[:] = raw_signal
+        return raw_signal_pit, fwd_ret
+
+    def scale_by_volatility(self, raw_signal: np.ndarray) -> np.ndarray:
+        """Rescales each name's signal time series by its conditional vol.
+
+        Dispatches to the :class:`VolatilityScaler` estimator matching
+        ``config.asset_class``: GARCH(1,1) for "fx", EWMA(lambda=0.94) for
+        "equity", HAR-RV for "futures".
+
+        Args:
+            raw_signal: 2-D array of shape (T, N) of raw signal innovations
+                (may contain leading NaNs from PIT alignment).
+
+        Returns:
+            2-D array of shape (T, N), each column divided by its own fitted
+            conditional volatility path.
+
+        Raises:
+            ValueError: If ``config.asset_class`` is not a recognized value.
+        """
+        cfg = self.config
+        scaled = np.full_like(raw_signal, np.nan)
+        for i in range(raw_signal.shape[1]):
+            col = raw_signal[:, i]
+            valid = ~np.isnan(col)
+            series = col[valid]
+            if cfg.asset_class == "fx":
+                vol = VolatilityScaler.garch_11(series)
+            elif cfg.asset_class == "equity":
+                vol = VolatilityScaler.ewma(series)
+            elif cfg.asset_class == "futures":
+                vol = VolatilityScaler.har_rv(np.abs(series))
+            else:
+                raise ValueError(f"Unknown asset_class: {cfg.asset_class!r}")
+            scaled[valid, i] = series / (vol + 1e-9)
+        return scaled
+
+    @staticmethod
+    def robust_zscore(x: np.ndarray, k: float = 3.0) -> np.ndarray:
+        """Median/MAD z-score with symmetric winsorization at +/- k.
+
+        Robust to outliers relative to a mean/std z-score because both the
+        median and the MAD have a 50% breakdown point.
+
+        Args:
+            x: 1-D array of raw feature values for one cross-section.
+            k: Winsorization threshold, in robust-sigma units. Defaults to 3.0.
+
+        Returns:
+            1-D array of the same shape as ``x``, robust-z-scored and clipped
+            to [-k, k].
+        """
+        med = np.nanmedian(x)
+        mad = np.nanmedian(np.abs(x - med)) * 1.4826  # consistency const. for N(0,1)
+        z = (x - med) / (mad + 1e-9)
+        return np.clip(z, -k, k)
+
+    def sector_neutralize(self, x_row: np.ndarray) -> np.ndarray:
+        """De-means and rescales a single cross-section within each sector.
+
+        Args:
+            x_row: 1-D array of shape (n_stocks,), one day's feature values.
+
+        Returns:
+            1-D array of shape (n_stocks,), sector-demeaned and sector-
+            rescaled to unit variance within each sector bucket. Sectors
+            with fewer than 2 members are left at zero.
+        """
+        z = np.zeros_like(x_row)
+        for s in range(self.config.n_sectors):
+            mask = self.sectors == s
+            if mask.sum() > 1:
+                z[mask] = (x_row[mask] - x_row[mask].mean()) / (x_row[mask].std() + 1e-9)
+        return z
+
+    @staticmethod
+    def test_stationarity(series: np.ndarray, significance: float = 0.05) -> dict:
+        """Runs an Augmented Dickey-Fuller test for mean reversion.
+
+        Args:
+            series: 1-D array, a single name's (or the cross-sectional mean)
+                feature time series to test.
+            significance: p-value threshold below which the unit-root null
+                is rejected. Defaults to 0.05.
+
+        Returns:
+            A dict with keys ``"adf_stat"`` (float), ``"p_value"`` (float),
+            and ``"is_stationary"`` (bool, True if p_value < significance).
+        """
+        clean = series[~np.isnan(series)]
+        adf_stat, p_value, *_ = adfuller(clean, autolag="AIC")
+        return {
+            "adf_stat": adf_stat,
+            "p_value": p_value,
+            "is_stationary": bool(p_value < significance),
+        }
+
+
+# --------------------------------------------------------------------------- #
+# Phase 2: Orthogonalization
+# --------------------------------------------------------------------------- #
+class Orthogonalizer:
+    """Phase 2: enforces marginal-information-content discipline on a signal.
+
+    Attributes:
+        factor_library: 2-D array of shape (T, n_factors) holding the
+            existing, already-deployed factor return/exposure series that
+            the candidate signal must be residualized against.
+    """
+
+    def __init__(self, factor_library: np.ndarray):
+        """Stores the existing factor library used for residualization.
+
+        Args:
+            factor_library: 2-D array of shape (T, n_factors).
+
+        Returns:
+            None.
+        """
+        self.factor_library = np.asarray(factor_library, dtype=float)
+
+    def gram_schmidt_residualize(self, alpha_raw: np.ndarray) -> np.ndarray:
+        """Projects out the component of alpha_raw spanned by each factor.
+
+        Implements
+        alpha_resid = alpha_raw - sum_j [ <alpha_raw, F_j> / <F_j, F_j> ] F_j.
+
+        Args:
+            alpha_raw: 1-D array of shape (T,), the candidate signal's time
+                series (e.g. its daily cross-sectional IC, or its PnL).
+
+        Returns:
+            1-D array of shape (T,), the residual signal carrying only
+            information orthogonal to every column of ``factor_library``.
+        """
+        alpha_raw = np.asarray(alpha_raw, dtype=float)
+        resid = alpha_raw.copy()
+        for j in range(self.factor_library.shape[1]):
+            f_j = self.factor_library[:, j]
+            denom = f_j @ f_j
+            if denom > 1e-12:
+                proj_coef = (alpha_raw @ f_j) / denom
+                resid = resid - proj_coef * f_j
+        return resid
+
+    @staticmethod
+    def marchenko_pastur_threshold(n_obs: int, n_vars: int) -> tuple[float, float]:
+        """Computes the Marcenko-Pastur noise-band eigenvalue bounds.
+
+        Args:
+            n_obs: Number of time-series observations (T) used to build the
+                correlation matrix.
+            n_vars: Number of variables/signals (N) in the correlation
+                matrix.
+
+        Returns:
+            A tuple ``(lambda_minus, lambda_plus)`` -- the theoretical lower
+            and upper bounds, under i.i.d. noise, of the eigenvalue spectrum
+            of an N x N correlation matrix estimated from T observations.
+        """
+        q = n_vars / n_obs
+        lambda_plus = (1 + np.sqrt(q)) ** 2
+        lambda_minus = (1 - np.sqrt(q)) ** 2
+        return lambda_minus, lambda_plus
+
+    def denoise_correlation_matrix(
+        self, corr: np.ndarray, n_obs: int
+    ) -> tuple[np.ndarray, np.ndarray, float]:
+        """Shrinks noise-band eigenvalues to their common average.
+
+        Eigenvectors associated with eigenvalues at or below the
+        Marcenko-Pastur upper bound are deemed indistinguishable from
+        random-matrix noise; their eigenvalues are replaced by the average
+        noise-band eigenvalue (preserving the trace) before the correlation
+        matrix is reconstructed.
+
+        Args:
+            corr: 2-D array of shape (N, N), a sample correlation matrix.
+            n_obs: Number of observations (T) used to estimate ``corr``.
+
+        Returns:
+            A tuple ``(corr_clean, eigvals_raw, lambda_plus)``:
+            ``corr_clean`` is the denoised, unit-diagonal correlation matrix
+            of shape (N, N); ``eigvals_raw`` is the original eigenvalue
+            spectrum (ascending); ``lambda_plus`` is the Marcenko-Pastur
+            upper bound used as the cutoff.
+        """
+        n_vars = corr.shape[0]
+        eigvals, eigvecs = np.linalg.eigh(corr)
+        _, lambda_plus = self.marchenko_pastur_threshold(n_obs, n_vars)
+
+        is_noise = eigvals <= lambda_plus
+        eigvals_clean = eigvals.copy()
+        if is_noise.sum() > 0:
+            eigvals_clean[is_noise] = eigvals[is_noise].mean()
+
+        corr_clean = eigvecs @ np.diag(eigvals_clean) @ eigvecs.T
+        d = np.sqrt(np.diag(corr_clean))
+        corr_clean = corr_clean / np.outer(d, d)
+        return corr_clean, eigvals, lambda_plus
+
+
+# --------------------------------------------------------------------------- #
+# Phase 3: Robustness & Validation
+# --------------------------------------------------------------------------- #
+@dataclasses.dataclass
+class CPCVConfig:
+    """Configuration for purged & embargoed walk-forward validation.
+
+    Attributes:
+        train_min: Minimum number of leading observations reserved purely for
+            the initial training window before the first test fold begins.
+        fold_len: Number of consecutive out-of-sample days evaluated per
+            fold.
+        embargo: Number of days purged immediately after each training/test
+            boundary to remove serial-correlation leakage.
+    """
+
+    train_min: int = 252
+    fold_len: int = 126
+    embargo: int = 21
+
+
+class RobustnessValidator:
+    """Phase 3: statistical stress-testing of a feature, not a backtest search.
+
+    Attributes:
+        config: The :class:`CPCVConfig` controlling the walk-forward split.
+    """
+
+    def __init__(self, config: CPCVConfig):
+        """Stores the walk-forward configuration.
+
+        Args:
+            config: Purge/embargo/fold-length configuration.
+
+        Returns:
+            None.
+        """
+        self.config = config
+
+    def cpcv_evaluate(
+        self,
+        genesis: SignalGenesis,
+        raw_signal: np.ndarray,
+        fwd_ret: np.ndarray,
+    ) -> np.ndarray:
+        """Runs the full feature pipeline inside a purged walk-forward loop.
+
+        For every day in every out-of-sample fold: winsorize+robust-z-score
+        the day's raw cross-section, sector-neutralize it, then compute the
+        Spearman rank IC against that day's forward return. Training data
+        immediately preceding each test fold is skipped over by
+        ``config.embargo`` days to prevent serial-correlation leakage across
+        the train/test boundary.
+
+        Args:
+            genesis: A fitted :class:`SignalGenesis` instance (supplies
+                ``sector_neutralize`` and the sector map).
+            raw_signal: 2-D array of shape (T, N), PIT-aligned raw signal
+                (may contain leading NaN rows).
+            fwd_ret: 2-D array of shape (T, N), forward returns aligned to
+                ``raw_signal``.
+
+        Returns:
+            1-D array of daily out-of-sample Spearman rank-IC observations,
+            one entry per evaluated day across all folds.
+        """
+        cfg = self.config
+        n_days = raw_signal.shape[0]
+        ics = []
+        for t0 in range(cfg.train_min, n_days - cfg.fold_len - cfg.embargo, cfg.fold_len):
+            start = t0 + cfg.embargo
+            stop = start + cfg.fold_len
+            for t in range(start, stop):
+                row = raw_signal[t]
+                if np.isnan(row).all():
+                    continue
+                feat = SignalGenesis.robust_zscore(row)
+                feat = genesis.sector_neutralize(feat)
+                ic, _ = spearmanr(feat, fwd_ret[t], nan_policy="omit")
+                ics.append(ic)
+        return np.array(ics)
+
+    @staticmethod
+    def probabilistic_sharpe_ratio(
+        sr_hat: float,
+        sr_benchmark: float,
+        n_obs: int,
+        skew: float,
+        kurt: float,
+    ) -> float:
+        """Computes the Probabilistic Sharpe Ratio (Bailey & Lopez de Prado).
+
+        PSR(SR*) = Phi( (SR_hat - SR*) * sqrt(T-1)
+                         / sqrt(1 - skew*SR_hat + (kurt-1)/4 * SR_hat^2) ).
+
+        Args:
+            sr_hat: The estimated (realized) Sharpe ratio.
+            sr_benchmark: The Sharpe ratio threshold being tested against
+                (use 0 for "is this skill, not luck"; use the deflated
+                benchmark SR0 to get the Deflated Sharpe Ratio).
+            n_obs: Number of return observations used to estimate ``sr_hat``.
+            skew: Sample skewness of the underlying returns.
+            kurt: Non-excess (Pearson) kurtosis of the underlying returns,
+                where 3.0 corresponds to a normal distribution. Pass
+                ``scipy.stats.kurtosis(x, fisher=False)`` -- NOT the default
+                ``fisher=True`` (excess) convention, which would silently
+                shift this formula by 3.
+
+        Returns:
+            The probability (in [0, 1]) that the true Sharpe ratio exceeds
+            ``sr_benchmark``, given the estimation noise implied by
+            ``n_obs``, ``skew``, and ``kurt``.
+        """
+        denom = np.sqrt(max(1 - skew * sr_hat + (kurt - 1) / 4 * sr_hat ** 2, 1e-12))
+        z = (sr_hat - sr_benchmark) * np.sqrt(n_obs - 1) / denom
+        return float(stats.norm.cdf(z))
+
+    def deflated_sharpe_ratio(
+        self,
+        sr_hat: float,
+        sr_trials: Sequence[float],
+        n_obs: int,
+        skew: float,
+        kurt: float,
+    ) -> tuple[float, float]:
+        """Computes the Deflated Sharpe Ratio (Bailey & Lopez de Prado, 2014).
+
+        Deflates ``sr_hat`` by the expected maximum Sharpe ratio that would
+        arise from pure luck across ``len(sr_trials)`` independent trials,
+        SR0, then evaluates the Probabilistic Sharpe Ratio of ``sr_hat``
+        against that higher, multiple-testing-corrected benchmark.
+
+        Args:
+            sr_hat: The Sharpe ratio of the signal/strategy actually selected.
+            sr_trials: Sequence of Sharpe ratios observed across all N trials
+                explored during development (including the selected one).
+            n_obs: Number of return observations used to estimate ``sr_hat``.
+            skew: Sample skewness of the selected strategy's returns.
+            kurt: Non-excess (Pearson) kurtosis of the selected strategy's
+                returns (3.0 = normal). See
+                :meth:`probabilistic_sharpe_ratio` for the convention
+                warning.
+
+        Returns:
+            A tuple ``(dsr, sr0)``: ``dsr`` is the Deflated Sharpe Ratio
+            (probability the true Sharpe exceeds the luck-adjusted
+            benchmark); ``sr0`` is that benchmark itself.
+
+        Raises:
+            ValueError: If fewer than 2 trials are supplied.
+        """
+        sr_trials = np.asarray(sr_trials, dtype=float)
+        n_trials = len(sr_trials)
+        if n_trials < 2:
+            raise ValueError("deflated_sharpe_ratio requires at least 2 trials.")
+
+        var_sr = np.var(sr_trials, ddof=1)
+        sr0 = np.sqrt(var_sr) * (
+            (1 - EULER_MASCHERONI) * stats.norm.ppf(1 - 1.0 / n_trials)
+            + EULER_MASCHERONI * stats.norm.ppf(1 - 1.0 / (n_trials * np.e))
+        )
+        dsr = self.probabilistic_sharpe_ratio(sr_hat, sr0, n_obs, skew, kurt)
+        return dsr, float(sr0)
+
+    @staticmethod
+    def fit_ou_decay(ic_series: np.ndarray, dt: float = 1.0) -> dict:
+        """Fits an Ornstein-Uhlenbeck process to an IC time series.
+
+        Discretizes dX_t = kappa*(mu - X_t)*dt + sigma*dW_t as the AR(1)
+        regression X_{t+1} = a + b*X_t + eps, then maps back to OU
+        parameters via b = 1 - kappa*dt, a = kappa*mu*dt.
+
+        Args:
+            ic_series: 1-D array of sequential out-of-sample IC observations.
+            dt: Time step between observations, in the same units as the
+                desired half-life. Defaults to 1.0 (one day).
+
+        Returns:
+            A dict with keys ``"kappa"`` (mean-reversion speed), ``"mu"``
+            (long-run mean IC), ``"sigma"`` (innovation volatility), and
+            ``"half_life"`` (in units of ``dt``; ``np.inf`` if kappa <= 0,
+            i.e. the IC shows no mean reversion / a non-decaying or growing
+            edge over the sample).
+        """
+        x = ic_series[:-1]
+        y = ic_series[1:]
+        design = np.column_stack([np.ones_like(x), x])
+        coeffs, _, _, _ = np.linalg.lstsq(design, y, rcond=None)
+        a, b = coeffs
+
+        kappa = (1 - b) / dt
+        mu = a / (kappa * dt) if abs(kappa) > 1e-12 else np.nan
+        resid = y - design @ coeffs
+        sigma = np.std(resid, ddof=2) / np.sqrt(dt)
+        half_life = np.log(2) / kappa if kappa > 0 else np.inf
+
+        return {"kappa": kappa, "mu": mu, "sigma": sigma, "half_life": half_life}
+
+
+# --------------------------------------------------------------------------- #
+# Phase 4: Portfolio Construction & Execution
+# --------------------------------------------------------------------------- #
+class PortfolioConstructor:
+    """Phase 4: sizes and risk-manages a validated signal net of trading costs.
+
+    Attributes:
+        fractional_kelly: The fraction ``f`` of full Kelly leverage used when
+            sizing positions, e.g. 0.5 for "half-Kelly".
+    """
+
+    def __init__(self, fractional_kelly: float = 0.5):
+        """Stores the fractional-Kelly risk-buffer setting.
+
+        Args:
+            fractional_kelly: Fraction of full-Kelly leverage to deploy.
+                Must lie in (0, 1].
+
+        Returns:
+            None.
+
+        Raises:
+            ValueError: If ``fractional_kelly`` is not in (0, 1].
+        """
+        if not 0 < fractional_kelly <= 1:
+            raise ValueError("fractional_kelly must be in (0, 1].")
+        self.fractional_kelly = fractional_kelly
+
+    @staticmethod
+    def ledoit_wolf_shrinkage(returns: np.ndarray) -> tuple[np.ndarray, float]:
+        """Shrinks the sample covariance toward a constant-correlation target.
+
+        Implements Ledoit & Wolf (2003), "Honey, I Shrunk the Sample
+        Covariance Matrix": Sigma_LW = delta*F + (1-delta)*Sigma_emp, where F
+        keeps each asset's own sample variance but replaces every pairwise
+        correlation with the cross-sectional average correlation r_bar. The
+        shrinkage intensity delta is estimated from the data (not a free
+        parameter) by minimizing expected Frobenius loss against the
+        (unobserved) true covariance.
+
+        Args:
+            returns: 2-D array of shape (T, N) of (ideally demeaned) asset
+                returns, T observations on N assets, with T comparable to or
+                smaller than N (the regime where shrinkage helps most).
+
+        Returns:
+            A tuple ``(sigma_lw, delta)``: ``sigma_lw`` is the shrunk
+            covariance matrix of shape (N, N); ``delta`` is the estimated
+            shrinkage intensity in [0, 1] (0 = no shrinkage, pure sample
+            covariance; 1 = fully shrunk to the constant-correlation
+            target).
+        """
+        x = np.asarray(returns, dtype=float)
+        x = x - x.mean(axis=0, keepdims=True)
+        t_obs, n_vars = x.shape
+
+        sample_cov = (x.T @ x) / t_obs
+        std = np.sqrt(np.diag(sample_cov))
+        outer_std = np.outer(std, std)
+        corr = sample_cov / (outer_std + 1e-18)
+
+        off_diag_mask = ~np.eye(n_vars, dtype=bool)
+        r_bar = corr[off_diag_mask].mean()
+
+        target = r_bar * outer_std
+        np.fill_diagonal(target, np.diag(sample_cov))
+
+        # pi_hat: sum of asymptotic variances of the sample covariance entries.
+        pi_mat = np.zeros((n_vars, n_vars))
+        for i in range(n_vars):
+            for j in range(n_vars):
+                term = x[:, i] * x[:, j] - sample_cov[i, j]
+                pi_mat[i, j] = np.mean(term ** 2)
+        pi_hat = pi_mat.sum()
+
+        # rho_hat: diagonal terms equal pi_ii; off-diagonal terms use the
+        # constant-correlation target's sensitivity to the two marginal
+        # variances (Ledoit & Wolf, 2003, eq. 5).
+        rho_hat = np.trace(pi_mat)
+        for i in range(n_vars):
+            for j in range(n_vars):
+                if i == j:
+                    continue
+                term_i = (x[:, i] ** 2 - sample_cov[i, i]) * (x[:, i] * x[:, j] - sample_cov[i, j])
+                term_j = (x[:, j] ** 2 - sample_cov[j, j]) * (x[:, i] * x[:, j] - sample_cov[i, j])
+                rho_ij = (
+                    (std[j] / (2 * std[i])) * np.mean(term_i)
+                    + (std[i] / (2 * std[j])) * np.mean(term_j)
+                )
+                rho_hat += r_bar * rho_ij
+
+        gamma_hat = np.sum((target - sample_cov) ** 2)
+        kappa_hat = (pi_hat - rho_hat) / gamma_hat if gamma_hat > 1e-18 else 0.0
+        delta = float(np.clip(kappa_hat / t_obs, 0.0, 1.0))
+
+        sigma_lw = delta * target + (1 - delta) * sample_cov
+        return sigma_lw, delta
+
+    def kelly_size(self, mu: np.ndarray, sigma2: np.ndarray) -> np.ndarray:
+        """Computes fractional-Kelly position weights for independent bets.
+
+        w* = f * mu / sigma^2, per the single-asset Kelly criterion applied
+        name-by-name (i.e. assuming ``sigma2`` already reflects each name's
+        idiosyncratic variance after any portfolio netting).
+
+        Args:
+            mu: 1-D array of expected (alpha) returns per name.
+            sigma2: 1-D array of return variances per name, same shape as
+                ``mu``.
+
+        Returns:
+            1-D array of position weights, same shape as ``mu``, scaled by
+            ``self.fractional_kelly``.
+        """
+        return self.fractional_kelly * mu / (sigma2 + 1e-18)
+
+    @staticmethod
+    def estimate_kyle_lambda(price_changes: np.ndarray, signed_volume: np.ndarray) -> float:
+        """Estimates Kyle's Lambda by regressing price impact on signed flow.
+
+        lambda = Delta P / Delta Q, estimated here as the OLS slope of
+        ``price_changes`` on ``signed_volume`` (no intercept), i.e. price
+        impact per unit of signed order flow.
+
+        Args:
+            price_changes: 1-D array of period price changes, shape (T,).
+            signed_volume: 1-D array of signed traded volume (+ for buys,
+                - for sells) over the same periods, shape (T,).
+
+        Returns:
+            The estimated Kyle's Lambda (price units per unit volume).
+        """
+        denom = signed_volume @ signed_volume
+        if denom < 1e-12:
+            return 0.0
+        return float((signed_volume @ price_changes) / denom)
+
+    @staticmethod
+    def almgren_chriss_trajectory(
+        total_shares: float,
+        n_intervals: int,
+        sigma: float,
+        eta: float,
+        risk_aversion: float,
+    ) -> tuple[np.ndarray, float]:
+        """Derives the optimal Almgren-Chriss execution trajectory and cost.
+
+        Optimal holdings trajectory x_t = X * sinh(kappa*(T-t)) /
+        sinh(kappa*T), where kappa = sqrt(risk_aversion * sigma^2 / eta)
+        trades off price-risk variance against temporary market-impact cost.
+
+        Args:
+            total_shares: Total order size X to be liquidated/acquired.
+            n_intervals: Number of discrete trading intervals T.
+            sigma: Per-interval price volatility of the asset.
+            eta: Temporary market-impact coefficient (cost per unit trading
+                rate).
+            risk_aversion: Risk-aversion parameter (lambda) trading off
+                variance of execution cost against expected cost.
+
+        Returns:
+            A tuple ``(trajectory, expected_cost)``: ``trajectory`` is a 1-D
+            array of shape (n_intervals + 1,) giving remaining shares to be
+            executed at each interval boundary (``trajectory[0] ==
+            total_shares``, ``trajectory[-1] == 0``); ``expected_cost`` is
+            the approximate total expected implementation cost (temporary
+            impact only) of following that trajectory.
+        """
+        kappa = np.sqrt(max(risk_aversion * sigma ** 2 / eta, 0.0))
+        t_grid = np.arange(n_intervals + 1)
+        if kappa * n_intervals < 1e-8:
+            trajectory = total_shares * (1 - t_grid / n_intervals)
+        else:
+            trajectory = total_shares * np.sinh(kappa * (n_intervals - t_grid)) / np.sinh(
+                kappa * n_intervals
+            )
+        trade_rates = -np.diff(trajectory)
+        expected_cost = float(eta * np.sum(trade_rates ** 2))
+        return trajectory, expected_cost
+
+    def evaluate_trade(
+        self, expected_alpha: float, kyle_lambda: float, order_size: float
+    ) -> tuple[bool, float]:
+        """Applies the execution gate: reject if impact exceeds expected alpha.
+
+        Args:
+            expected_alpha: Expected dollar (or bps-equivalent) profit from
+                the trade, gross of impact.
+            kyle_lambda: Estimated price impact per unit volume, from
+                :meth:`estimate_kyle_lambda`.
+            order_size: Size (in the same volume units as ``kyle_lambda`` was
+                estimated on) of the proposed order.
+
+        Returns:
+            A tuple ``(accept, projected_impact)``: ``accept`` is True iff
+            ``expected_alpha >= projected_impact``; ``projected_impact`` is
+            ``kyle_lambda * order_size``.
+        """
+        projected_impact = kyle_lambda * order_size
+        return expected_alpha >= projected_impact, projected_impact
+
+
+# --------------------------------------------------------------------------- #
+# Visualisation helpers
+# --------------------------------------------------------------------------- #
+
+def _base_layout(title: str, height: int = 520, width: int = 1100) -> dict:
+    """Returns a dict of common layout kwargs for every figure.
+
+    Args:
+        title: Chart title string, rendered top-left in ``TEXT_PRI`` colour.
+        height: Canvas height in pixels. Defaults to 520.
+        width: Canvas width in pixels. Defaults to 1100.
+
+    Returns:
+        Dict suitable for unpacking into ``fig.update_layout(**...)``.
+    """
+    return dict(
+        title=dict(
+            text=title,
+            font=dict(size=17, color=TEXT_PRI, family=FONT_FAMILY),
+            x=0.04, xanchor="left", y=0.97,
+        ),
+        paper_bgcolor=BG,
+        plot_bgcolor=PANEL,
+        font=dict(family=FONT_FAMILY, color=TEXT_SEC, size=12),
+        height=height,
+        width=width,
+        margin=dict(l=70, r=40, t=70, b=60),
+        legend=dict(
+            bgcolor=BG, bordercolor=BORDER, borderwidth=1,
+            font=dict(color=TEXT_PRI, size=11),
+            x=0.99, xanchor="right", y=0.99, yanchor="top",
+        ),
+    )
+
+
+def _style_axes(fig: go.Figure, rows: int = 1, cols: int = 1) -> None:
+    """Applies the shared axis style across all subplots.
+
+    Args:
+        fig: The Plotly figure whose axes are to be styled.
+        rows: Number of subplot rows. Defaults to 1.
+        cols: Number of subplot columns. Defaults to 1.
+
+    Returns:
+        None.
+    """
+    axis_style = dict(
+        showgrid=True, gridcolor=GRID, gridwidth=1,
+        zeroline=True, zerolinecolor=BORDER, zerolinewidth=1,
+        showline=True, linecolor=BORDER, linewidth=1,
+        tickfont=dict(color=TEXT_SEC, size=11),
+        title_font=dict(color=TEXT_PRI, size=12),
+    )
+    for r in range(1, rows + 1):
+        for c in range(1, cols + 1):
+            suffix = "" if (r == 1 and c == 1) else f"{(r - 1) * cols + c}"
+            fig.update_layout(**{
+                f"xaxis{suffix}": axis_style,
+                f"yaxis{suffix}": axis_style,
+            })
+
+
+def _save(fig: go.Figure, filename: str) -> None:
+    """Writes a Plotly figure to ``OUTPUT_DIR/<filename>`` at 2x scale.
+
+    Args:
+        fig: Fully configured Plotly figure.
+        filename: Output filename (including extension, e.g. ``"chart.png"``).
+
+    Returns:
+        None.
+    """
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    path = os.path.join(OUTPUT_DIR, filename)
+    fig.write_image(path, scale=2)
+    print(f"  ✓  saved  {path}")
+
+
+# --------------------------------------------------------------------------- #
+# Phase 1 chart
+# --------------------------------------------------------------------------- #
+
+def plot_phase1_signal_genesis(results: dict) -> None:
+    """Four-panel Phase 1 overview: raw vs vol-scaled signal, ADF, sector dist.
+
+    Args:
+        results: Dict produced by :func:`run_pipeline`.  Required keys:
+            ``raw_signal``, ``vol_scaled``, ``sectors``, ``n_sectors``,
+            ``filing_lag``, ``stat_check``.
+
+    Returns:
+        None. Writes ``outputs/phase1_signal_genesis.png``.
+    """
+    raw_signal = results["raw_signal"]
+    vol_scaled = results["vol_scaled"]
+    sectors    = results["sectors"]
+    n_sectors  = results["n_sectors"]
+
+    T = raw_signal.shape[0]
+    days = np.arange(T)
+
+    cs_raw    = np.nanmean(raw_signal, axis=1)
+    cs_scaled = np.nanmean(vol_scaled, axis=1)
+    cs_ser    = pd.Series(cs_scaled)
+    roll_vol  = cs_ser.rolling(21).std().values
+
+    fig = make_subplots(
+        rows=2, cols=2,
+        subplot_titles=[
+            "Cross-Sectional Mean Signal — Raw vs Vol-Scaled",
+            "Rolling 21-Day Signal Volatility (Vol-Scaled)",
+            "Signal Distribution — Day 500 Cross-Section",
+            "Stock Count per Sector",
+        ],
+        vertical_spacing=0.18,
+        horizontal_spacing=0.10,
+    )
+
+    fig.add_trace(go.Scatter(
+        x=days, y=cs_raw,
+        mode="lines", name="Raw (CS mean)",
+        line=dict(color=BORDER, width=1),
+        opacity=0.7,
+    ), row=1, col=1)
+    fig.add_trace(go.Scatter(
+        x=days, y=cs_scaled,
+        mode="lines", name="Vol-Scaled (CS mean)",
+        line=dict(color=TEAL, width=1.5),
+    ), row=1, col=1)
+    pit_lag = results["filing_lag"]
+    fig.add_vrect(
+        x0=0, x1=pit_lag,
+        fillcolor=RED, opacity=0.12,
+        line_width=0,
+        annotation_text=f"PIT lag ({pit_lag}d)",
+        annotation_position="top left",
+        annotation_font=dict(color=RED, size=10),
+        row=1, col=1,
+    )
+
+    fig.add_trace(go.Scatter(
+        x=days, y=roll_vol,
+        mode="lines", name="21d Rolling σ",
+        line=dict(color=GOLD, width=1.5),
+        fill="tozeroy",
+        fillcolor="rgba(240,165,0,0.10)",
+        showlegend=False,
+    ), row=1, col=2)
+
+    day_idx = min(500, T - 1)
+    cs_day  = vol_scaled[day_idx]
+    cs_day  = cs_day[~np.isnan(cs_day)]
+    kde_x   = np.linspace(cs_day.min(), cs_day.max(), 300)
+    kde_y   = stats.gaussian_kde(cs_day)(kde_x)
+
+    fig.add_trace(go.Histogram(
+        x=cs_day, nbinsx=40,
+        name="Day-500 XS dist",
+        marker=dict(color=TEAL, opacity=0.55, line=dict(color=PANEL, width=0.5)),
+        histnorm="probability density",
+        showlegend=False,
+    ), row=2, col=1)
+    fig.add_trace(go.Scatter(
+        x=kde_x, y=kde_y,
+        mode="lines", name="KDE",
+        line=dict(color=GOLD, width=2),
+        showlegend=False,
+    ), row=2, col=1)
+    norm_y = stats.norm.pdf(kde_x, 0, 1)
+    fig.add_trace(go.Scatter(
+        x=kde_x, y=norm_y,
+        mode="lines", name="N(0,1)",
+        line=dict(color=RED, width=1.5, dash="dot"),
+        showlegend=False,
+    ), row=2, col=1)
+
+    counts = [(sectors == s).sum() for s in range(n_sectors)]
+    fig.add_trace(go.Bar(
+        x=[f"S{s}" for s in range(n_sectors)],
+        y=counts,
+        marker=dict(
+            color=counts,
+            colorscale=[[0, PANEL], [1, TEAL]],
+            line=dict(color=BORDER, width=0.8),
+        ),
+        showlegend=False,
+        text=counts,
+        textposition="outside",
+        textfont=dict(color=TEXT_PRI, size=10),
+    ), row=2, col=2)
+
+    fig.update_layout(**_base_layout("Phase 1 — Signal Genesis", height=680))
+    _style_axes(fig, rows=2, cols=2)
+
+    for col_idx, label in enumerate(["Day", "Day", "Signal Value (robust-z)", "Sector"], start=1):
+        row_n = 1 if col_idx <= 2 else 2
+        col_n = col_idx if col_idx <= 2 else col_idx - 2
+        suffix = "" if (row_n == 1 and col_n == 1) else f"{(row_n - 1) * 2 + col_n}"
+        fig.update_layout(**{f"xaxis{suffix}": dict(title_text=label)})
+    fig.update_layout(yaxis=dict(title_text="CS Mean Signal"))
+    fig.update_layout(yaxis2=dict(title_text="σ (CS mean)"))
+    fig.update_layout(yaxis3=dict(title_text="Density"))
+    fig.update_layout(yaxis4=dict(title_text="# Stocks"))
+
+    adf = results["stat_check"]
+    pval_txt = (
+        f"ADF stat: {adf['adf_stat']:.2f}  p={adf['p_value']:.3g}  "
+        f"{'✓ stationary' if adf['is_stationary'] else '✗ non-stationary'}"
+    )
+    fig.add_annotation(
+        text=pval_txt,
+        xref="paper", yref="paper", x=0.50, y=1.01,
+        showarrow=False,
+        font=dict(color=GREEN if adf["is_stationary"] else RED, size=11, family=FONT_FAMILY),
+        align="center",
+    )
+
+    _save(fig, "phase1_signal_genesis.png")
+
+
+# --------------------------------------------------------------------------- #
+# Phase 2 chart
+# --------------------------------------------------------------------------- #
+
+def plot_phase2_orthogonalization(results: dict) -> None:
+    """Three-panel Phase 2: residualization scatter, eigenvalue spectrum, heatmap diff.
+
+    Args:
+        results: Dict produced by :func:`run_pipeline`.  Required keys:
+            ``alpha_raw_ts``, ``alpha_resid``, ``factor_library``,
+            ``eigvals``, ``lambda_plus``, ``corr``, ``corr_clean``.
+
+    Returns:
+        None. Writes ``outputs/phase2_orthogonalization.png``.
+    """
+    alpha_raw_ts = results["alpha_raw_ts"]
+    alpha_resid  = results["alpha_resid"]
+    factor_lib   = results["factor_library"]
+    eigvals      = results["eigvals"]
+    lambda_plus  = results["lambda_plus"]
+    corr         = results["corr"]
+    corr_clean   = results["corr_clean"]
+
+    fig = make_subplots(
+        rows=1, cols=3,
+        subplot_titles=[
+            "Alpha TS: Raw vs Residualised (vs Factor 0)",
+            "Eigenvalue Spectrum — Marcenko-Pastur Denoising",
+            "Correlation Structure: |Sample| − |Denoised|",
+        ],
+        horizontal_spacing=0.10,
+    )
+
+    #f0 = factor_lib[:, 0]
+    #norm_resid = (alpha_resid - alpha_resid.min()) / (alpha_resid.ptp() + 1e-12)
+    f0 = factor_lib[:, 0]
+    norm_resid = (alpha_resid - alpha_resid.min()) / (np.ptp(alpha_resid) + 1e-12)
+    fig.add_trace(go.Scatter(
+        x=f0, y=alpha_raw_ts,
+        mode="markers",
+        name="Raw α",
+        marker=dict(
+            color=norm_resid,
+            colorscale=[[0, RED], [0.5, GOLD], [1, TEAL]],
+            size=4, opacity=0.7,
+            colorbar=dict(
+                title="Residual α<br>(normalised)",
+                thickness=10, len=0.5,
+                tickfont=dict(color=TEXT_SEC, size=9),
+                title_font=dict(color=TEXT_PRI, size=10),
+                bgcolor=BG,
+            ),
+        ),
+        showlegend=False,
+    ), row=1, col=1)
+
+    slope_raw = np.polyfit(f0, alpha_raw_ts, 1)
+    x_line = np.linspace(f0.min(), f0.max(), 200)
+    fig.add_trace(go.Scatter(
+        x=x_line, y=np.polyval(slope_raw, x_line),
+        mode="lines", name="OLS (raw)",
+        line=dict(color=RED, width=1.5, dash="dash"),
+        showlegend=True,
+    ), row=1, col=1)
+
+    slope_res = np.polyfit(f0, alpha_resid, 1)
+    fig.add_trace(go.Scatter(
+        x=x_line, y=np.polyval(slope_res, x_line),
+        mode="lines", name="OLS (residualised)",
+        line=dict(color=GREEN, width=1.5, dash="dash"),
+        showlegend=True,
+    ), row=1, col=1)
+
+    fig.add_trace(go.Histogram(
+        x=eigvals, nbinsx=35,
+        name="Eigenvalues",
+        marker=dict(color=TEAL, opacity=0.65, line=dict(color=PANEL, width=0.5)),
+        showlegend=False,
+    ), row=1, col=2)
+    fig.add_vline(
+        x=lambda_plus, line_color=RED, line_width=2, line_dash="dash",
+        annotation_text=f"λ⁺ = {lambda_plus:.2f}", row=1, col=2,  # type: ignore[call-arg]
+        annotation_font=dict(color=RED, size=10),
+        annotation_position="top right",
+    )
+    n_signal = int((eigvals > lambda_plus).sum())
+    n_noise  = len(eigvals) - n_signal
+    fig.add_annotation(
+        text=f"{n_signal} signal  |  {n_noise} noise eigenvalues",
+        xref="x2", yref="paper",
+        x=lambda_plus + 0.05 * (eigvals.max() - lambda_plus),
+        y=0.85,
+        showarrow=False,
+        font=dict(color=PURPLE, size=10, family=FONT_FAMILY),
+    )
+
+    N = corr.shape[0]
+    cap = min(N, 40)
+    diff = np.abs(corr[:cap, :cap]) - np.abs(corr_clean[:cap, :cap])
+    fig.add_trace(go.Heatmap(
+        z=diff,
+        colorscale=[
+            [0.0, "#1a4a7a"],
+            [0.5, PANEL],
+            [1.0, "#7a1a1a"],
+        ],
+        zmid=0,
+        showscale=True,
+        colorbar=dict(
+            title="|ρ_sample|−|ρ_clean|",
+            thickness=10, len=0.5,
+            tickfont=dict(color=TEXT_SEC, size=9),
+            title_font=dict(color=TEXT_PRI, size=10),
+            bgcolor=BG,
+            x=1.01,
+        ),
+        showlegend=False,
+        name="Corr diff",
+    ), row=1, col=3)
+
+    fig.update_layout(**_base_layout("Phase 2 — Orthogonalization & Eigenvalue Denoising", height=500))
+    _style_axes(fig, rows=1, cols=3)
+    fig.update_layout(
+        xaxis=dict(title_text="Factor 0 exposure"),
+        yaxis=dict(title_text="Alpha TS value"),
+        xaxis2=dict(title_text="Eigenvalue"),
+        yaxis2=dict(title_text="Count"),
+        xaxis3=dict(title_text=f"Signal index (first {cap})"),
+        yaxis3=dict(title_text=f"Signal index (first {cap})"),
+    )
+
+    _save(fig, "phase2_orthogonalization.png")
+
+
+# --------------------------------------------------------------------------- #
+# Phase 3 chart
+# --------------------------------------------------------------------------- #
+
+def plot_phase3_validation(results: dict) -> None:
+    """Four-panel Phase 3: IC time series, distribution, cumulative IC, DSR.
+
+    Args:
+        results: Dict produced by :func:`run_pipeline`.  Required keys:
+            ``ics``, ``sr_hat``, ``sr0``, ``dsr``, ``ou``, ``sr_trials``.
+
+    Returns:
+        None. Writes ``outputs/phase3_validation.png``.
+    """
+    ics       = results["ics"]
+    sr_hat    = results["sr_hat"]
+    sr0       = results["sr0"]
+    dsr       = results["dsr"]
+    ou        = results["ou"]
+    sr_trials = results["sr_trials"]
+
+    T = len(ics)
+    days = np.arange(T)
+
+    roll_ic   = pd.Series(ics).rolling(21).mean().values
+    roll_vol  = pd.Series(ics).rolling(21).std().values
+    icir_roll = np.where(roll_vol > 1e-9, roll_ic / roll_vol, np.nan)
+
+    fig = make_subplots(
+        rows=2, cols=2,
+        subplot_titles=[
+            "Out-of-Sample Daily IC — Walk-Forward Folds",
+            "IC Distribution vs N(0,1)",
+            "Cumulative IC & Rolling ICIR",
+            "Deflated Sharpe Ratio — Trial Distribution",
+        ],
+        vertical_spacing=0.18,
+        horizontal_spacing=0.12,
+    )
+
+    ic_colors = [GREEN if v > 0 else RED for v in ics]
+    fig.add_trace(go.Bar(
+        x=days, y=ics,
+        marker_color=ic_colors,
+        marker_line_width=0,
+        opacity=0.55,
+        name="Daily IC",
+        showlegend=True,
+    ), row=1, col=1)
+    fig.add_trace(go.Scatter(
+        x=days, y=roll_ic,
+        mode="lines", name="21d Rolling IC",
+        line=dict(color=GOLD, width=2),
+    ), row=1, col=1)
+    mean_ic = ics.mean()
+    fig.add_hline(y=mean_ic, line_color=TEAL, line_dash="dot", line_width=1.5,
+                  annotation_text=f"Mean IC = {mean_ic:.4f}",
+                  annotation_font=dict(color=TEAL, size=10),
+                  annotation_position="bottom right", row=1, col=1)
+
+    kde_x  = np.linspace(ics.min() - 0.02, ics.max() + 0.02, 300)
+    kde_y  = stats.gaussian_kde(ics, bw_method=0.3)(kde_x)
+    norm_y = stats.norm.pdf(kde_x, 0, ics.std())
+
+    fig.add_trace(go.Histogram(
+        x=ics, nbinsx=40,
+        histnorm="probability density",
+        marker=dict(color=TEAL, opacity=0.5, line=dict(color=PANEL, width=0.4)),
+        name="IC hist",
+        showlegend=False,
+    ), row=1, col=2)
+    fig.add_trace(go.Scatter(
+        x=kde_x, y=kde_y, mode="lines",
+        line=dict(color=TEAL, width=2), name="KDE", showlegend=False,
+    ), row=1, col=2)
+    fig.add_trace(go.Scatter(
+        x=kde_x, y=norm_y, mode="lines",
+        line=dict(color=RED, width=1.5, dash="dot"), name="N(0,σ)", showlegend=False,
+    ), row=1, col=2)
+    fig.add_vline(x=mean_ic, line_color=GOLD, line_width=1.5,
+                  annotation_text=f"μ={mean_ic:.4f}", row=1, col=2,
+                  annotation_font=dict(color=GOLD, size=10),
+                  annotation_position="top right")
+
+    cum_ic = np.cumsum(ics)
+    fig.add_trace(go.Scatter(
+        x=days, y=cum_ic,
+        mode="lines", name="Cum. IC",
+        line=dict(color=GREEN, width=2),
+        fill="tozeroy", fillcolor="rgba(63,185,80,0.08)",
+    ), row=2, col=1)
+    icir_scaled = icir_roll * (cum_ic.max() / (np.nanmax(np.abs(icir_roll)) + 1e-9)) * 0.3
+    fig.add_trace(go.Scatter(
+        x=days, y=icir_scaled,
+        mode="lines", name="Rolling ICIR (scaled)",
+        line=dict(color=PURPLE, width=1.2, dash="dash"),
+    ), row=2, col=1)
+
+    if ou is not None:
+        fig.add_annotation(
+            text=f"OU half-life: {ou['half_life']:.1f} folds<br>μ_IC: {ou['mu']:.4f}",
+            xref="x3", yref="paper",
+            x=days[-1] * 0.05, y=0.35,
+            showarrow=False,
+            bgcolor=PANEL, bordercolor=BORDER, borderpad=4,
+            font=dict(color=TEXT_PRI, size=10, family=FONT_FAMILY),
+        )
+
+    fig.add_trace(go.Histogram(
+        x=sr_trials, nbinsx=30,
+        histnorm="probability density",
+        marker=dict(color=PURPLE, opacity=0.5, line=dict(color=PANEL, width=0.4)),
+        name="SR trials",
+        showlegend=False,
+    ), row=2, col=2)
+    fig.add_vline(x=sr_hat, line_color=GREEN, line_width=2,
+                  annotation_text=f"SR̂ = {sr_hat:.2f}",
+                  annotation_font=dict(color=GREEN, size=10),
+                  annotation_position="top left", row=2, col=2)
+    fig.add_vline(x=sr0, line_color=RED, line_width=2, line_dash="dash",
+                  annotation_text=f"SR₀ (luck) = {sr0:.2f}",
+                  annotation_font=dict(color=RED, size=10),
+                  annotation_position="top right", row=2, col=2)
+    fig.add_annotation(
+        text=f"DSR = {dsr:.3f}",
+        xref="x4", yref="paper",
+        x=sr_hat, y=0.12,
+        showarrow=True, arrowhead=2,
+        arrowcolor=GREEN,
+        font=dict(color=GREEN, size=12, family=FONT_FAMILY),
+        bgcolor=PANEL, bordercolor=BORDER, borderpad=4,
+    )
+
+    fig.update_layout(**_base_layout("Phase 3 — Robustness & Validation", height=680))
+    _style_axes(fig, rows=2, cols=2)
+    fig.update_layout(
+        xaxis=dict(title_text="OOS Day"),
+        yaxis=dict(title_text="Rank IC"),
+        xaxis2=dict(title_text="Rank IC"),
+        yaxis2=dict(title_text="Density"),
+        xaxis3=dict(title_text="OOS Day"),
+        yaxis3=dict(title_text="Cumulative IC"),
+        xaxis4=dict(title_text="Annualised Sharpe Ratio"),
+        yaxis4=dict(title_text="Density"),
+    )
+
+    icir = ics.mean() / ics.std()
+    stats_txt = (
+        f"IC mean: {ics.mean():.4f}  |  IC std: {ics.std():.4f}  |  "
+        f"ICIR: {icir:.3f}  |  SR̂: {sr_hat:.3f}  |  DSR: {dsr:.3f}"
+    )
+    fig.add_annotation(
+        text=stats_txt,
+        xref="paper", yref="paper", x=0.5, y=1.01,
+        showarrow=False,
+        font=dict(color=GOLD, size=10, family=FONT_FAMILY),
+        align="center",
+    )
+
+    _save(fig, "phase3_validation.png")
+
+
+# --------------------------------------------------------------------------- #
+# Phase 4 chart
+# --------------------------------------------------------------------------- #
+
+def plot_phase4_portfolio(results: dict) -> None:
+    """Four-panel Phase 4: covariance shrinkage, Kelly weights, AC trajectory, cost breakdown.
+
+    Args:
+        results: Dict produced by :func:`run_pipeline`.  Required keys:
+            ``sigma_lw``, ``sample_cov``, ``delta``, ``weights``,
+            ``trajectory``, ``exec_cost``, ``kyle_lambda``, ``accept``,
+            ``impact``, ``expected_alpha``.
+
+    Returns:
+        None. Writes ``outputs/phase4_portfolio.png``.
+    """
+    sigma_lw       = results["sigma_lw"]
+    sample_cov     = results["sample_cov"]
+    delta          = results["delta"]
+    weights        = results["weights"]
+    trajectory     = results["trajectory"]
+    exec_cost      = results["exec_cost"]
+    kyle_lambda    = results["kyle_lambda"]
+    accept         = results["accept"]
+    impact         = results["impact"]
+    expected_alpha = results["expected_alpha"]
+
+    N = sigma_lw.shape[0]
+    n_intervals = len(trajectory) - 1
+
+    fig = make_subplots(
+        rows=2, cols=2,
+        subplot_titles=[
+            "Covariance Shrinkage: Sample vs Ledoit-Wolf (diagonal)",
+            "Fractional-Kelly Position Weights",
+            "Almgren-Chriss Optimal Execution Trajectory",
+            "Execution Cost & Gate Decision",
+        ],
+        vertical_spacing=0.18,
+        horizontal_spacing=0.12,
+    )
+
+    idxs        = np.arange(N)
+    diag_sample = np.diag(sample_cov)
+    diag_lw     = np.diag(sigma_lw)
+
+    fig.add_trace(go.Scatter(
+        x=idxs, y=diag_sample,
+        mode="markers", name="Sample var",
+        marker=dict(color=RED, size=5, opacity=0.7, symbol="circle"),
+    ), row=1, col=1)
+    fig.add_trace(go.Scatter(
+        x=idxs, y=diag_lw,
+        mode="markers", name="LW shrunk var",
+        marker=dict(color=TEAL, size=5, opacity=0.8, symbol="diamond"),
+    ), row=1, col=1)
+    fig.add_annotation(
+        text=f"δ = {delta:.3f}",
+        xref="x", yref="paper",
+        x=N * 0.05, y=0.95,
+        showarrow=False,
+        bgcolor=PANEL, bordercolor=GOLD, borderpad=4,
+        font=dict(color=GOLD, size=12, family=FONT_FAMILY),
+    )
+
+    sorted_w  = np.sort(weights)[::-1]
+    bar_cols  = [GREEN if w > 0 else RED for w in sorted_w]
+    fig.add_trace(go.Bar(
+        x=np.arange(N), y=sorted_w,
+        marker_color=bar_cols,
+        marker_line_width=0,
+        opacity=0.75,
+        name="Kelly weight",
+        showlegend=False,
+    ), row=1, col=2)
+    fig.add_hline(y=weights.mean(), line_color=GOLD, line_dash="dot", line_width=1.5,
+                  annotation_text=f"Mean w = {weights.mean():.4f}",
+                  annotation_font=dict(color=GOLD, size=10),
+                  annotation_position="bottom right", row=1, col=2)
+
+    intervals   = np.arange(n_intervals + 1)
+    trade_rates = -np.diff(trajectory)
+    twap        = trajectory[0] * (1 - intervals / n_intervals)
+
+    fig.add_trace(go.Scatter(
+        x=intervals, y=twap,
+        mode="lines", name="TWAP (baseline)",
+        line=dict(color=BORDER, width=1.5, dash="dash"),
+    ), row=2, col=1)
+    fig.add_trace(go.Scatter(
+        x=intervals, y=trajectory,
+        mode="lines+markers", name="AC Optimal",
+        line=dict(color=TEAL, width=2.5),
+        marker=dict(size=6, color=TEAL, symbol="circle"),
+    ), row=2, col=1)
+    max_traj = trajectory[0]
+    for i, rate in enumerate(trade_rates):
+        fig.add_shape(
+            type="rect",
+            x0=i, x1=i + 0.6,
+            y0=0, y1=rate * max_traj / (np.abs(trade_rates).max() + 1e-12) * 0.15,
+            fillcolor=ORANGE, opacity=0.4,
+            line_width=0,
+            row=2, col=1,
+        )
+
+    categories  = ["Expected Alpha", "Projected Market Impact", "Net P&L"]
+    net_pnl     = expected_alpha - impact
+    bar_vals    = [expected_alpha, -impact, net_pnl]
+    bar_colours = [GREEN, RED, GREEN if net_pnl > 0 else RED]
+
+    fig.add_trace(go.Bar(
+        x=categories, y=bar_vals,
+        marker_color=bar_colours,
+        marker_line_width=0,
+        opacity=0.8,
+        text=[f"${v:,.0f}" for v in bar_vals],
+        textposition="outside",
+        textfont=dict(color=TEXT_PRI, size=11),
+        name="Cost breakdown",
+        showlegend=False,
+    ), row=2, col=2)
+    gate_color = GREEN if accept else RED
+    gate_text  = "TRADE ACCEPTED ✓" if accept else "TRADE REJECTED ✗"
+    fig.add_annotation(
+        text=gate_text,
+        xref="x4", yref="paper",
+        x=1.0, y=0.22,
+        showarrow=False,
+        bgcolor=PANEL, bordercolor=gate_color, borderpad=6,
+        font=dict(color=gate_color, size=13, family=FONT_FAMILY, weight="bold"),
+    )
+    fig.add_annotation(
+        text=f"Kyle's λ = {kyle_lambda:.3e}<br>Impact = ${impact:,.0f}<br>AC cost = ${exec_cost:,.0f}",
+        xref="x4", yref="paper",
+        x=1.0, y=0.05,
+        showarrow=False,
+        bgcolor=PANEL, bordercolor=BORDER, borderpad=4,
+        font=dict(color=TEXT_SEC, size=10, family=FONT_FAMILY),
+    )
+
+    fig.update_layout(**_base_layout("Phase 4 — Portfolio Construction & Execution", height=680))
+    _style_axes(fig, rows=2, cols=2)
+    fig.update_layout(
+        xaxis=dict(title_text="Asset index"),
+        yaxis=dict(title_text="Variance"),
+        xaxis2=dict(title_text="Asset rank"),
+        yaxis2=dict(title_text="Kelly weight"),
+        xaxis3=dict(title_text="Trading interval"),
+        yaxis3=dict(title_text="Shares remaining"),
+        xaxis4=dict(title_text=""),
+        yaxis4=dict(title_text="$ P&L / Impact"),
+    )
+
+    _save(fig, "phase4_portfolio.png")
+
+
+# --------------------------------------------------------------------------- #
+# Summary dashboard
+# --------------------------------------------------------------------------- #
+
+def plot_summary_dashboard(results: dict) -> None:
+    """Single-page executive summary across all four phases.
+
+    Args:
+        results: Dict produced by :func:`run_pipeline`.  Required keys:
+            ``ics``, ``weights``, ``trajectory``, ``sr_hat``, ``dsr``,
+            ``delta``, ``accept``, ``ou``, ``raw_signal``, ``vol_scaled``,
+            ``eigvals``, ``lambda_plus``.
+
+    Returns:
+        None. Writes ``outputs/summary_dashboard.png``.
+    """
+    ics        = results["ics"]
+    weights    = results["weights"]
+    trajectory = results["trajectory"]
+    sr_hat     = results["sr_hat"]
+    dsr        = results["dsr"]
+    delta      = results["delta"]
+    accept     = results["accept"]
+    ou         = results["ou"]
+
+    fig = make_subplots(
+        rows=2, cols=3,
+        subplot_titles=[
+            "P1 — Vol-Scaled Signal (CS Mean)",
+            "P2 — Eigenvalue Spectrum",
+            "P3 — Cumulative OOS IC",
+            "P3 — IC Distribution",
+            "P4 — Kelly Weights",
+            "P4 — AC Trajectory",
+        ],
+        vertical_spacing=0.16,
+        horizontal_spacing=0.09,
+    )
+
+    T         = results["raw_signal"].shape[0]
+    days      = np.arange(T)
+    cs_scaled = np.nanmean(results["vol_scaled"], axis=1)
+
+    fig.add_trace(go.Scatter(
+        x=days, y=cs_scaled, mode="lines",
+        line=dict(color=TEAL, width=1.2), showlegend=False,
+    ), row=1, col=1)
+
+    eigvals     = results["eigvals"]
+    lambda_plus = results["lambda_plus"]
+    fig.add_trace(go.Histogram(
+        x=eigvals, nbinsx=30,
+        marker=dict(color=TEAL, opacity=0.6, line=dict(color=PANEL, width=0.4)),
+        showlegend=False,
+    ), row=1, col=2)
+    fig.add_vline(x=lambda_plus, line_color=RED, line_width=1.5, line_dash="dash", row=1, col=2)
+
+    cum_ic   = np.cumsum(ics)
+    oos_days = np.arange(len(ics))
+    fig.add_trace(go.Scatter(
+        x=oos_days, y=cum_ic, mode="lines",
+        line=dict(color=GREEN, width=2),
+        fill="tozeroy", fillcolor="rgba(63,185,80,0.08)",
+        showlegend=False,
+    ), row=1, col=3)
+
+    kde_x = np.linspace(ics.min(), ics.max(), 200)
+    kde_y = stats.gaussian_kde(ics, bw_method=0.3)(kde_x)
+    fig.add_trace(go.Histogram(
+        x=ics, nbinsx=35, histnorm="probability density",
+        marker=dict(color=PURPLE, opacity=0.5, line=dict(color=PANEL, width=0.3)),
+        showlegend=False,
+    ), row=2, col=1)
+    fig.add_trace(go.Scatter(
+        x=kde_x, y=kde_y, mode="lines",
+        line=dict(color=PURPLE, width=2), showlegend=False,
+    ), row=2, col=1)
+
+    sorted_w = np.sort(weights)[::-1]
+    bar_cols = [GREEN if w > 0 else RED for w in sorted_w]
+    fig.add_trace(go.Bar(
+        x=np.arange(len(weights)), y=sorted_w,
+        marker_color=bar_cols, marker_line_width=0, opacity=0.7,
+        showlegend=False,
+    ), row=2, col=2)
+
+    n_iv      = len(trajectory) - 1
+    intervals = np.arange(n_iv + 1)
+    twap      = trajectory[0] * (1 - intervals / n_iv)
+    fig.add_trace(go.Scatter(
+        x=intervals, y=twap, mode="lines",
+        line=dict(color=BORDER, width=1.2, dash="dash"), showlegend=False,
+    ), row=2, col=3)
+    fig.add_trace(go.Scatter(
+        x=intervals, y=trajectory, mode="lines+markers",
+        line=dict(color=TEAL, width=2),
+        marker=dict(size=6, color=TEAL),
+        showlegend=False,
+    ), row=2, col=3)
+
+    fig.update_layout(**_base_layout("Alpha Pipeline — Executive Summary Dashboard", height=680, width=1300))
+    _style_axes(fig, rows=2, cols=3)
+
+    icir     = ics.mean() / ics.std()
+    gate     = "ACCEPTED ✓" if accept else "REJECTED ✗"
+    gate_col = GREEN if accept else RED
+    kpi_text = (
+        f"<b>Mean IC:</b> {ics.mean():.4f}  ·  "
+        f"<b>ICIR:</b> {icir:.3f}  ·  "
+        f"<b>Ann. SR:</b> {sr_hat:.3f}  ·  "
+        f"<b>DSR:</b> {dsr:.3f}  ·  "
+        f"<b>LW δ:</b> {delta:.3f}  ·  "
+        f"<b>Trade:</b> {gate}"
+    )
+    fig.add_annotation(
+        text=kpi_text,
+        xref="paper", yref="paper", x=0.5, y=1.03,
+        showarrow=False,
+        font=dict(color=TEXT_PRI, size=11, family=FONT_FAMILY),
+        align="center",
+    )
+
+    if ou and np.isfinite(ou["half_life"]):
+        fig.add_annotation(
+            text=f"OU half-life: {ou['half_life']:.1f} folds",
+            xref="paper", yref="paper", x=0.68, y=0.52,
+            showarrow=False,
+            font=dict(color=GOLD, size=10, family=FONT_FAMILY),
+        )
+
+    _save(fig, "summary_dashboard.png")
+
+
+# --------------------------------------------------------------------------- #
+# Public plotting entry point
+# --------------------------------------------------------------------------- #
+
+def generate_all_plots(results: dict) -> None:
+    """Generates and persists all five production charts to ``outputs/``.
+
+    Args:
+        results: Dict produced by :func:`run_pipeline`, containing all
+            intermediate arrays and scalars required by each chart function.
+
+    Returns:
+        None.
+    """
+    print("\nGenerating production charts …")
+    plot_phase1_signal_genesis(results)
+    plot_phase2_orthogonalization(results)
+    plot_phase3_validation(results)
+    plot_phase4_portfolio(results)
+    plot_summary_dashboard(results)
+    print(f"\nAll plots saved to  ./{OUTPUT_DIR}/\n")
+
+
+# --------------------------------------------------------------------------- #
+# End-to-end pipeline runner
+# --------------------------------------------------------------------------- #
+
+def run_pipeline() -> dict:
+    """Executes all four phases and collects every intermediate artifact.
+
+    Returns:
+        Dict containing all arrays, scalars, and diagnostics produced by
+        Phases 1-4, keyed for direct consumption by :func:`generate_all_plots`.
+    """
+    results: dict = {}
+
+    # ---- Phase 1: Signal Genesis ----------------------------------------- #
+    genesis = SignalGenesis(SignalGenesisConfig(
+        n_stocks=400, n_days=1000, n_sectors=8,
+        asset_class="equity", true_ic=0.05, filing_lag=2, seed=11,
+    ))
+    raw_signal, fwd_ret = genesis.simulate_point_in_time_data()
+    vol_scaled = genesis.scale_by_volatility(raw_signal)
+    stat_check = genesis.test_stationarity(np.nanmean(vol_scaled, axis=1))
+
+    results.update({
+        "raw_signal":  raw_signal,
+        "vol_scaled":  vol_scaled,
+        "sectors":     genesis.sectors,
+        "n_sectors":   genesis.config.n_sectors,
+        "filing_lag":  genesis.config.filing_lag,
+        "stat_check":  stat_check,
+    })
+
+    print("=== Phase 1: Signal Genesis ===")
+    print(f"PIT filing lag enforced: {genesis.config.filing_lag} day(s), "
+          f"leading NaN rows: {np.isnan(raw_signal).all(axis=1).sum()}")
+    print(f"ADF on cross-sectional mean signal: stat={stat_check['adf_stat']:.3f}, "
+          f"p={stat_check['p_value']:.4g}, stationary={stat_check['is_stationary']}")
+
+    # ---- Phase 2: Orthogonalization --------------------------------------- #
+    rng = np.random.default_rng(7)
+    n_factors = 3
+    factor_library = rng.normal(0, 1, (genesis.config.n_days, n_factors))
+    alpha_raw_ts = np.nanmean(vol_scaled, axis=1)
+    alpha_raw_ts = np.where(np.isnan(alpha_raw_ts), 0.0, alpha_raw_ts)
+
+    ortho = Orthogonalizer(factor_library)
+    alpha_resid = ortho.gram_schmidt_residualize(alpha_raw_ts)
+
+    signal_panel = np.nan_to_num(vol_scaled[:, :60])
+    corr = np.corrcoef(signal_panel.T)
+    corr_clean, eigvals, lambda_plus = ortho.denoise_correlation_matrix(
+        corr, n_obs=signal_panel.shape[0]
+    )
+    n_signal_eigs = int((eigvals > lambda_plus).sum())
+
+    results.update({
+        "alpha_raw_ts":  alpha_raw_ts,
+        "alpha_resid":   alpha_resid,
+        "factor_library": factor_library,
+        "corr":          corr,
+        "corr_clean":    corr_clean,
+        "eigvals":       eigvals,
+        "lambda_plus":   lambda_plus,
+    })
+
+    print("\n=== Phase 2: Orthogonalization ===")
+    print(f"Residual alpha vs raw alpha, corr with factor 0: "
+          f"{np.corrcoef(alpha_raw_ts, factor_library[:, 0])[0, 1]:.3f} -> "
+          f"{np.corrcoef(alpha_resid, factor_library[:, 0])[0, 1]:.3f}")
+    print(f"Marcenko-Pastur: {n_signal_eigs}/{len(eigvals)} eigenvalues "
+          f"above noise floor (lambda+={lambda_plus:.3f})")
+
+    # ---- Phase 3: Robustness & Validation --------------------------------- #
+    validator = RobustnessValidator(CPCVConfig(train_min=252, fold_len=126, embargo=21))
+    ics = validator.cpcv_evaluate(genesis, raw_signal, fwd_ret)
+
+    daily_pnl = ics
+    sr_hat = daily_pnl.mean() / daily_pnl.std(ddof=1) * np.sqrt(252)
+    skew = stats.skew(daily_pnl)
+    kurt = stats.kurtosis(daily_pnl, fisher=False)
+    sr_trials = rng.normal(0, daily_pnl.std(ddof=1) * np.sqrt(252), 50)
+    sr_trials[0] = sr_hat
+    dsr, sr0 = validator.deflated_sharpe_ratio(sr_hat, sr_trials, len(daily_pnl), skew, kurt)
+
+    fold_means = np.array([
+        ics[i:i + 126].mean() for i in range(0, len(ics) - 126 + 1, 126)
+    ])
+    ou: Optional[dict] = None
+    if len(fold_means) >= 3:
+        ou = validator.fit_ou_decay(fold_means)
+
+    results.update({
+        "ics":       ics,
+        "sr_hat":    sr_hat,
+        "sr0":       sr0,
+        "dsr":       dsr,
+        "ou":        ou,
+        "sr_trials": sr_trials,
+    })
+
+    print("\n=== Phase 3: Robustness & Validation ===")
+    print(f"Walk-forward folds evaluated: {len(ics)} daily OOS observations")
+    print(f"Mean Rank IC = {ics.mean():.4f}   IC std = {ics.std():.4f}")
+    print(f"ICIR = {ics.mean() / ics.std():.3f}")
+    print(f"Annualized SR_hat = {sr_hat:.3f}, luck-adjusted benchmark SR0 = {sr0:.3f}, "
+          f"DSR = {dsr:.3f}")
+    if ou is not None:
+        print(f"OU decay fit on fold-level IC: kappa={ou['kappa']:.3f}, "
+              f"mu={ou['mu']:.4f}, half_life={ou['half_life']:.2f} folds")
+
+    # ---- Phase 4: Portfolio Construction & Execution ---------------------- #
+    asset_returns = rng.multivariate_normal(
+        mean=np.zeros(30),
+        cov=0.3 * np.ones((30, 30)) + 0.7 * np.eye(30),
+        size=60,
+    )
+    constructor = PortfolioConstructor(fractional_kelly=0.5)
+    sigma_lw, delta = constructor.ledoit_wolf_shrinkage(asset_returns)
+    sample_cov = np.cov(asset_returns, rowvar=False)
+
+    mu = np.full(30, 0.0005)
+    sigma2 = np.diag(sigma_lw)
+    weights = constructor.kelly_size(mu, sigma2)
+
+    price_changes = rng.normal(0, 0.01, 500)
+    signed_volume = rng.normal(0, 1000, 500)
+    price_changes += 2e-6 * signed_volume
+    kyle_lambda = constructor.estimate_kyle_lambda(price_changes, signed_volume)
+    trajectory, exec_cost = constructor.almgren_chriss_trajectory(
+        total_shares=100_000, n_intervals=10, sigma=0.02, eta=2e-6, risk_aversion=1e-6,
+    )
+    expected_alpha = 5_000.0
+    accept, impact = constructor.evaluate_trade(
+        expected_alpha=expected_alpha, kyle_lambda=kyle_lambda, order_size=100_000
+    )
+
+    results.update({
+        "sigma_lw":       sigma_lw,
+        "sample_cov":     sample_cov,
+        "delta":          delta,
+        "weights":        weights,
+        "trajectory":     trajectory,
+        "exec_cost":      exec_cost,
+        "kyle_lambda":    kyle_lambda,
+        "accept":         accept,
+        "impact":         impact,
+        "expected_alpha": expected_alpha,
+    })
+
+    print("\n=== Phase 4: Portfolio Construction & Execution ===")
+    print(f"Ledoit-Wolf shrinkage intensity delta = {delta:.3f}")
+    print(f"||Sigma_sample||_F = {np.linalg.norm(sample_cov):.3f}, "
+          f"||Sigma_LW||_F = {np.linalg.norm(sigma_lw):.3f}")
+    print(f"Fractional-Kelly weights: mean={weights.mean():.4f}, "
+          f"max={weights.max():.4f}")
+    print(f"Kyle's Lambda (hat) = {kyle_lambda:.3e}")
+    print(f"Almgren-Chriss expected impact cost over trajectory = {exec_cost:.2f}")
+    print(f"Execution gate: projected_impact={impact:.2f}, "
+          f"trade {'ACCEPTED' if accept else 'REJECTED'}")
+
+    return results
+
+
+# --------------------------------------------------------------------------- #
+# Entry point
+# --------------------------------------------------------------------------- #
+
+def main() -> None:
+    """Runs the synthetic short-interest example through all four phases and plots.
+
+    Returns:
+        None. Prints diagnostics for each phase to stdout and writes five
+        PNG charts to ``outputs/``.
+    """
+    results = run_pipeline()
+    generate_all_plots(results)
+
+
+if __name__ == "__main__":
+    main()
 ```
 
 ```
+=== Phase 1: Signal Genesis ===
+PIT filing lag enforced: 2 day(s), leading NaN rows: 2
+ADF on cross-sectional mean signal: stat=-30.165, p=0, stationary=True
+
+=== Phase 2: Orthogonalization ===
+Residual alpha vs raw alpha, corr with factor 0: 0.019 -> -0.002
+Marcenko-Pastur: 1/60 eigenvalues above noise floor (lambda+=1.550)
+
+=== Phase 3: Robustness & Validation ===
 Walk-forward folds evaluated: 630 daily OOS observations
-Mean Rank IC = 0.0481   IC std = 0.0492
-ICIR = 0.977   t-stat = 24.49
+Mean Rank IC = 0.0018   IC std = 0.0493
+ICIR = 0.037
+Annualized SR_hat = 0.584, luck-adjusted benchmark SR0 = 1.711, DSR = 0.000
+OU decay fit on fold-level IC: kappa=1.132, mu=-0.0006, half_life=0.61 folds
+
+=== Phase 4: Portfolio Construction & Execution ===
+Ledoit-Wolf shrinkage intensity delta = 1.000
+||Sigma_sample||_F = 9.101, ||Sigma_LW||_F = 8.283
+Fractional-Kelly weights: mean=0.0003, max=0.0004
+Kyle's Lambda (hat) = 2.331e-06
+Almgren-Chriss expected impact cost over trajectory = 2000.02
+Execution gate: projected_impact=0.23, trade ACCEPTED
+
+Generating production charts …
+  ✓  saved  outputs\phase1_signal_genesis.png
+  ✓  saved  outputs\phase2_orthogonalization.png
+  ✓  saved  outputs\phase3_validation.png
+  ✓  saved  outputs\phase4_portfolio.png
+  ✓  saved  outputs\summary_dashboard.png
+
+All plots saved to  ./outputs/
 ```
 
-> "In production, I set up a decay monitor: if the rolling 20-day IC drops below 0.02 for
-> three consecutive months, the signal is flagged for kill/rebuild. I've killed signals I was
-> emotionally attached to — that discipline is what separates researchers from gamblers."
+![phase1_signal_genesis.png](./outputs/phase1_signal_genesis.png)
+
+![phase2_orthogonalization.png](./outputs/phase2_orthogonalization.png)
+
+![phase3_validation.png](./outputs/phase3_validation.png)
+
+![phase4_portfolio.png](./outputs/phase4_portfolio.png)
+
+![summary_dashboard.png](./outputs/summary_dashboard.png)
+
+> "In production, I set up a decay monitor: if the rolling 20-day IC drops below 0.02 for three consecutive months, the signal is flagged for kill/rebuild. I've killed signals I was emotionally attached to — that discipline is what separates researchers from gamblers."
 
 [🔝 Back to Top](#table-of-contents)
 
