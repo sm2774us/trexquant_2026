@@ -1759,7 +1759,7 @@ $$\mathbf{P}_{\mathbf{X}} = \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}
 Thus:
 
 $$
-\hat{\mathbf{y}} = \mathbf{P}_{\mathbf{X}}\mathbf{y}$
+\hat{\mathbf{y}} = \mathbf{P}_{\mathbf{X}}\mathbf{y}
 $$
 
 The matrix:
@@ -1768,7 +1768,13 @@ $$
 \mathbf{P}_{\mathbf{X}}
 $$ 
 
-is idempotent ( $\mathbf{P}_{\mathbf{X}}^2 = \mathbf{P}_{\mathbf{X}}$ ) and symmetric
+is idempotent - 
+
+$$
+\mathbf{P}_{\mathbf{X}}^2 = \mathbf{P}_{\mathbf{X}}
+$
+
+- and symmetric.
 
 The vector of residuals is:
 
