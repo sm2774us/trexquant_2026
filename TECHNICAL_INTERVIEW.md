@@ -126,12 +126,12 @@ $$r_i = \alpha_i + \beta_i r_m + \epsilon_i, \qquad \mathbb{E}[\epsilon_i] = 0,\
 
 **Step 2 — Take expectations of both sides.** Since $\mathbb{E}[\epsilon_i] = 0$ by assumption:
 
-$$\mathbb{E}[r_i] = \alpha_i + \beta_i \,\mathbb{E}[r_m]$$
+$$\mathbb{E}[r_i] = \alpha_i + \beta_i \cdot \mathbb{E}[r_m]$$
 
 **Step 3 — Solve for $\alpha_i$.** This is the definition of alpha as a *projection residual* — it is whatever
 expected return is left over once you've projected $r_i$ onto the span of the factor $r_m$:
 
-$$\alpha_i = \mathbb{E}[r_i] - \beta_i\,\mathbb{E}[r_m]$$
+$$\alpha_i = \mathbb{E}[r_i] - \beta_i \cdot \mathbb{E}[r_m]$$
 
 **Step 4 — Generalize to $K$ factors.** Replace the single market factor with a factor vector
 $\mathbf{f} = (f_1,\ldots,f_K)$ (market, value, momentum, size, quality, …):
@@ -512,9 +512,7 @@ correlation $IC$:
 
 $$\mathbb{E}[z_i r_i] = \text{Cov}(z_i, r_i) = IC$$
 
-For the variance, use $\text{Var}(XY) = \mathbb{E}[X^2Y^2] - (\mathbb{E}[XY])^2$. For bivariate normal
-variables with unit variance, $\mathbb{E}[X^2Y^2] = 1 + 2\,IC^2$ (a standard Isserlis/Wick's-theorem result
-for jointly Gaussian variables), so:
+For the variance, use $\text{Var}(XY) = \mathbb{E}[X^2Y^2] - (\mathbb{E}[XY])^2$. For bivariate normal variables with unit variance, $\mathbb{E}[X^2Y^2] = 1 + 2 \cdot IC^2$ (a standard Isserlis/Wick's-theorem result for jointly Gaussian variables), so:
 
 $$\text{Var}(z_i r_i) = (1 + 2IC^2) - IC^2 = 1 + IC^2$$
 
@@ -613,7 +611,7 @@ sector-neutralization, Q06, is not optional.)
 **Step 1 — Model the IC term structure.** Compute $IC(h) = \text{Corr}(f_{i,t}, r_{i,t\to t+h})$ at multiple
 forward horizons $h=1,2,5,10,20,60$ days, and assume exponential decay:
 
-$$IC(h) = IC_0\, e^{-\lambda h}$$
+$$IC(h) = IC_0 \cdot e^{-\lambda h}$$
 
 **Step 2 — Linearize by taking logs** (turns the nonlinear fit into ordinary least squares):
 
@@ -812,13 +810,26 @@ We want the weight vector $\mathbf{w}$ that maximizes the **Information Ratio** 
 
 **Step 2 — Express IR of the combination.** The combined signal's correlation with forward returns has
 
-$$\text{Numerator (signal-return covariance)} = \mathbb{E}\!\left[(\mathbf{F}_t^\top\mathbf{w})\,r_t\right] = \mathbf{w}^\top \mathbb{E}[\mathbf{F}_t r_t] = \mathbf{w}^\top\boldsymbol{\mu}, \quad \boldsymbol{\mu} \equiv \frac{\mathbf{F}^\top\mathbf{r}}{T}$$
+$$
+\begin{aligned}
+\text{Numerator (signal-return covariance)} &= \mathbb{E}\!\left[(\mathbf{F}_t^\top\mathbf{w})\,r_t\right] \\
+&= \mathbf{w}^\top \mathbb{E}[\mathbf{F}_t r_t] \\
+&= \mathbf{w}^\top\boldsymbol{\mu} \\
+\boldsymbol{\mu} \equiv \frac{\mathbf{F}^\top\mathbf
+\end{aligned}
+$$
 
-$$\text{Denominator (signal variance)} = \text{Var}(\mathbf{F}_t^\top\mathbf{w}) = \mathbf{w}^\top \mathbf{\Sigma}\mathbf{w}, \quad \mathbf{\Sigma} \equiv \frac{\mathbf{F}^\top\mathbf{F}}{T}$$
+$$
+\begin{aligned}
+\text{Denominator (signal variance)} &= \text{Var}(\mathbf{F}_t^\top\mathbf{w}) \\
+&= \mathbf{w}^\top \mathbf{\Sigma}\mathbf{w} \\
+\mathbf{\Sigma} \equiv \frac{\mathbf{F}^\top\mathbf{F}}{T}
+\end{aligned}
+$$
 
 So the objective is the **generalized Sharpe ratio of the combination**:
 
-$$\max_{\mathbf{w}} \; \frac{\mathbf{w}^\top \boldsymbol{\mu}}{\sqrt{\mathbf{w}^\top\mathbf{\Sigma}\mathbf{w}}}$$
+$$\max_{\mathbf{w}} \quad \frac{\mathbf{w}^\top \boldsymbol{\mu}}{\sqrt{\mathbf{w}^\top\mathbf{\Sigma}\mathbf{w}}}$$
 
 **Step 3 — Note scale invariance.** This ratio is unchanged if $\mathbf{w}\to c\mathbf{w}$ for any $c>0$.
 So fix the scale via the constraint $\mathbf{w}^\top\mathbf{\Sigma}\mathbf{w} = 1$ and instead maximize the
