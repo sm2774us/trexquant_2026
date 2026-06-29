@@ -1772,7 +1772,7 @@ is idempotent -
 
 $$
 \mathbf{P}_{\mathbf{X}}^2 = \mathbf{P}_{\mathbf{X}}
-$
+$$
 
 - and symmetric.
 
