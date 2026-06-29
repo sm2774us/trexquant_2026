@@ -261,7 +261,7 @@ RSS_k &= RSS_{k+1} + \underbrace{\hat\beta_{k+1}^2 \cdot \|\tilde x_{k+1}\|^2}_{
 \end{aligned}
 $$
 
-This is a **purely geometric** re-derivation of **[Q01-Step3](#q01--you-add-a-feature-you-already-know-doesnt-work--what-happens)** — moving to a bigger subspace can only shorten the distance to $y$ (or leave it unchanged), it can never lengthen it.
+This is a **purely geometric** re-derivation of **[Q01-Step3](#step-3--quantify-the-expected-drop-in-residual-sum-of-squares)** — moving to a bigger subspace can only shorten the distance to $y$ (or leave it unchanged), it can never lengthen it.
 
 #### **Step 4 — Frisch–Waugh–Lovell (FWL): what the "extra" direction actually is.**
 
@@ -338,7 +338,7 @@ The "subspace gets bigger, distance never increases" picture is the right mental
 
 **Open with the intuition (15 seconds):**
 > "The F-test asks a precise question: is the extra distance you closed by adding this feature — that little
-> orthogonal hop in Q02's diagram — large relative to the noise floor you'd expect from a useless direction? It's
+> orthogonal hop in **[Q02's diagram](#-ascii-diagram--nested-subspaces--the-orthogonal-decomposition)** — large relative to the noise floor you'd expect from a useless direction? It's
 > a ratio of two independent chi-squared pieces living in orthogonal subspaces of the *same* residual vector,
 > normalized by their dimension. Under the null it's centered near 1 by construction, because Q01-Step3 already
 > told us the expected gain from a dead feature is exactly one unit of $\sigma^2$ — which is precisely what the
