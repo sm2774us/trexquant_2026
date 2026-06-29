@@ -59,12 +59,12 @@ before touching any of the three sub-questions.
 Because $\beta_{k+1}=0$ truly, $X_+$ contains the true model as a special case. OLS on the augmented design gives:
 
 $$
-\begin{flalign}
-&& \hat\beta_+ &= (X_+^\top X_+)^{-1}X_+^\top y & \\
-&& \mathbb{E}[\hat\beta_+ \mid X_+] &= (X_+^\top X_+)^{-1}X_+^\top & \\
-&& \mathbb{E}[y\mid X_+] &= (X_+^\top X_+)^{-1}X_+^\top X_+\beta_+ & \\
-&& &= \beta_+ &
-\end{flalign}
+\begin{aligned}
+\hat\beta_+ &= (X_+^\top X_+)^{-1}X_+^\top y \\
+\mathbb{E}[\hat\beta_+ \mid X_+] &= (X_+^\top X_+)^{-1}X_+^\top \mathbb{E}[y\mid X_+] \\
+&= (X_+^\top X_+)^{-1}X_+^\top X_+\beta_+ \\
+&= \beta_+
+\end{aligned}
 $$
 
 where $\beta_+ = (\beta^\top, 0)^\top$. So $\mathbb{E}[\hat\beta_j]=\beta_j$ for $j\le k$ **and** $\mathbb{E}[\hat\beta_{k+1}]=0$.
