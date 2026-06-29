@@ -363,7 +363,7 @@ Under $H_0$, both pieces are pure noise: $(RSS_k-RSS_{k+1})\sim\sigma^2\chi^2_1$
 $$
 \begin{aligned}
 F &= \frac{\chi_1^2/1}{\chi^2_{n-k-1}/(n-k-1)} \\
-&\sim F_{1, \, n-k-1}
+&\sim F_{1,n-k-1}
 \end{aligned}
 $$
 
