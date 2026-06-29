@@ -218,7 +218,7 @@ This is the single most common silent failure mode in a macro signal pipeline: a
 
 ### 🧮 First-Principles Derivation
 
-**Step 1 — OLS as orthogonal projection.**
+#### **Step 1 — OLS as orthogonal projection.**
 
 $\hat y_k = P_X y$ is, by the projection theorem, the *unique* point in $\text{col}(X)$ closest to $y$ in Euclidean distance — this is precisely what "$\min_\beta\|y-X\beta\|^2$" means geometrically. The residual $\hat\epsilon_k = M_Xy$ is, by construction of the orthogonal projector, perpendicular to every vector in $\text{col}(X)$ :
 
@@ -228,7 +228,7 @@ $$
 
 the normal equations *are* the orthogonality condition.
 
-**Step 2 — Nested subspaces: $\text{col}(X)\subset\text{col}(X_+)$.**
+#### **Step 2 — Nested subspaces: $\text{col}(X)\subset\text{col}(X_+)$.**
 
 Because:
 
@@ -238,7 +238,7 @@ $$
 
 , every linear combination of $X$'s columns is trivially also a linear combination of $X_+$'s columns (just set the new coefficient to 0). So $\text{col}(X)$ is a $k$-dimensional subspace strictly nested inside the $(k+1)$-dimensional $\text{col}(X_+)$.
 
-**Step 3 — Pythagorean proof that $RSS_{k+1}\le RSS_k$ (the geometric version of Q01-Step2), proved rigorously via the orthogonal-direct-sum projector identity — not asserted.**
+#### **Step 3 — Pythagorean proof that $RSS_{k+1}\le RSS_k$ (the geometric version of Q01-Step2), proved rigorously via the orthogonal-direct-sum projector identity — not asserted.**
 
 Because $\tilde x_{k+1}=M_Xx_{k+1}$ is, by construction, orthogonal to every vector in $\text{col}(X)$, the bigger column space splits as an **orthogonal direct sum**: $\text{col}(X_+)=\text{col}(X)\oplus\text{span}\{\tilde x_{k+1}\}$. For any orthogonal direct sum of subspaces $V=V_1\oplus V_2$ (with $V_1\perp V_2$), decomposing any vector uniquely into its $V_1$-component, $V_2$-component, and orthogonal remainder shows immediately that the projector onto $V$ is the **sum** of the individual projectors: $P_V=P_{V_1}+P_{V_2}$. Applying this with $V_1=\text{col}(X)$, $V_2=\text{span}\{\tilde x_{k+1}\}$ :
 
@@ -263,7 +263,7 @@ $$
 
 This is a **purely geometric** re-derivation of **[Q01-Step3](#q01--you-add-a-feature-you-already-know-doesnt-work--what-happens)** — moving to a bigger subspace can only shorten the distance to $y$ (or leave it unchanged), it can never lengthen it.
 
-**Step 4 — Frisch–Waugh–Lovell (FWL): what the "extra" direction actually is.**
+#### **Step 4 — Frisch–Waugh–Lovell (FWL): what the "extra" direction actually is.**
 
 $\tilde x_{k+1} = M_X \cdot x_{k+1}$ is the part of the new feature that is genuinely *new information* — everything about $x_{k+1}$ that was already spanned by $X$ has been projected away. FWL states that regressing $y$ on the full $X_+$ gives the *exact same* $\hat\beta_{k+1}$ as the simple univariate regression of $y$ on $\tilde x_{k+1}$ alone ( equivalently, of $\hat\epsilon_k$ on $\tilde x_{k+1}$, since $\tilde x_{k+1} \perp \text{col}(X)$ kills the $\hat y_k$ part of $y$ ):
 
@@ -273,7 +273,7 @@ $$
 
 Geometrically: **the new coefficient is the projection of the *old residual vector* onto the new orthogonalized direction.** This is the cleanest possible statement of "is there anything left in the residual that this new feature explains?"
 
-**Step 5 — Why this is "noise capture" when $\beta_{k+1}=0$ truly.**
+#### **Step 5 — Why this is "noise capture" when $\beta_{k+1}=0$ truly.**
 
 Under correct specification, $\hat\epsilon_k=M_X\epsilon$ — the old residual *is* pure noise (rotated into the $(n-k)$-dimensional orthogonal complement of $\text{col}(X)$). Since $\epsilon$ is isotropic Gaussian noise, its projection onto *any* fixed direction inside that $(n-k)$-dim complement — in particular onto $\tilde x_{k+1}$ — has expected squared length exactly $\sigma^2$ (one unit of noise variance per dimension "spent").  The new feature isn't explaining signal; **it is mechanically guaranteed to soak up some noise just by virtue of being a new axis inside a space that is, by assumption, nothing but noise.**
 
