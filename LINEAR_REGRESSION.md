@@ -245,7 +245,7 @@ $$
 \end{flalign}
 $$
 
-So $\hat y_{k+1}-\hat y_k=\hat\beta_{k+1} \cdot \tilde x_{k+1}$ **exactly** (this is also exactly the FWL coefficient from Step 4 below), and since $\tilde x_{k+1}\perp\text{col}(X)\ni\hat y_k$, this increment is orthogonal to $\hat y_k$ by construction, not approximately. Combined with $\hat\epsilon_{k+1}\perp\text{col}(X_+)\supseteq\{\hat y_k,\,\hat y_{k+1}-\hat y_k\}$, the Pythagorean theorem on the right triangle $y,\hat y_k,\hat y_{k+1}$ gives:
+So $\hat y_{k+1}-\hat y_k=\hat\beta_{k+1} \cdot \tilde x_{k+1}$ **exactly** (this is also exactly the FWL coefficient from Step 4 below), and since $\tilde x_{k+1}\perp\text{col}(X)\ni\hat y_k$, this increment is orthogonal to $\hat y_k$ by construction, not approximately. Combined with $\hat\epsilon_{k+1}\perp\text{col}(X_+)\supseteq\{\hat y_k, \, \hat y_{k+1}-\hat y_k\}$, the Pythagorean theorem on the right triangle $y,\hat y_k,\hat y_{k+1}$ gives:
 
 $$
 \|y-\hat y_k\|^2 = \|y-\hat y_{k+1}\|^2 + \|\hat y_{k+1}-\hat y_k\|^2 \quad\Longrightarrow\quad RSS_k = RSS_{k+1} + \underbrace{\hat\beta_{k+1}^2 \cdot \|\tilde x_{k+1}\|^2}_{\ge 0}
@@ -358,12 +358,12 @@ From **[Q02-Step3](#q02--geometric-interpretation)** and **[Q02-Diagram](#q02--g
 
 **Step 3 — Distribution under $H_0$.**
 
-Under $H_0$, both pieces are pure noise: $(RSS_k-RSS_{k+1})\sim\sigma^2\chi^2_1$ (Q01-Step3) and $RSS_{k+1}\sim\sigma^2\chi^2_{n-k-1}$ (Q01-Step4), independent of each other. A ratio of two independent $\chi^2$ variables, each divided by its own degrees of freedom, is by *definition* an $F$ random variable:
+Under $H_0$, both pieces are pure noise: $(RSS_k-RSS_{k+1})\sim\sigma^2\chi^2_1$ (Q01-Step3) and $RSS_{k+1} \sim \sigma^2\chi^2_{n-k-1}$ (Q01-Step4), independent of each other. A ratio of two independent $\chi^2$ variables, each divided by its own degrees of freedom, is by *definition* an $F$ random variable:
 
 $$
 \begin{aligned}
 F &= \frac{\chi_1^2/1}{\chi^2_{n-k-1}/(n-k-1)} \\
-&\sim F_{1,\,n-k-1}
+&\sim F_{1, \, n-k-1}
 \end{aligned}
 $$
 
