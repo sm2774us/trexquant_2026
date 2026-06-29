@@ -230,7 +230,13 @@ the normal equations *are* the orthogonality condition.
 
 **Step 2 — Nested subspaces: $\text{col}(X)\subset\text{col}(X_+)$.**
 
-Because $X_+ = \begin{bmatrix} X & x_{k+1} \end{bmatrix}$, every linear combination of $X$'s columns is trivially also a linear combination of $X_+$'s columns (just set the new coefficient to 0). So $\text{col}(X)$ is a $k$-dimensional subspace strictly nested inside the $(k+1)$-dimensional $\text{col}(X_+)$.
+Because:
+
+$$
+X_+ = \begin{bmatrix} X & x_{k+1} \end{bmatrix}
+$$
+
+, every linear combination of $X$'s columns is trivially also a linear combination of $X_+$'s columns (just set the new coefficient to 0). So $\text{col}(X)$ is a $k$-dimensional subspace strictly nested inside the $(k+1)$-dimensional $\text{col}(X_+)$.
 
 **Step 3 — Pythagorean proof that $RSS_{k+1}\le RSS_k$ (the geometric version of Q01-Step2), proved rigorously via the orthogonal-direct-sum projector identity — not asserted.**
 
