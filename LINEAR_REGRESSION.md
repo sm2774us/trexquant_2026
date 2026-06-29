@@ -54,7 +54,7 @@ before touching any of the three sub-questions.
 
 ### 🧮 First-Principles Derivation
 
-**Step 1 — Unbiasedness is preserved (this is the asymmetric twin of omitted-variable bias).**
+#### **Step 1 — Unbiasedness is preserved (this is the asymmetric twin of omitted-variable bias).**
 
 Because $\beta_{k+1}=0$ truly, $X_+$ contains the true model as a special case. OLS on the augmented design gives:
 
@@ -79,7 +79,7 @@ $$
 
 Omission biases the kept coefficients ( unless $\delta=0$ ); **inclusion of a useless feature never does.** This asymmetry is the whole point of the question.
 
-**Step 2 — In-sample fit weakly improves, by construction, regardless of truth.**
+#### **Step 2 — In-sample fit weakly improves, by construction, regardless of truth.**
 
 OLS minimizes $\|y-X_+\gamma\|^2$ over a strictly larger feasible set than $\|y-X\beta\|^2$ ( set $\gamma_{k+1}=0$ to recover the smaller problem ), so:
 
@@ -89,7 +89,7 @@ $$
 
 With continuous data this is a probability-zero event — **$R^2$ will go up even though the feature is genuinely useless.** This is the mechanical artifact that makes naive in-sample $R^2$ unusable as a feature-inclusion gate.
 
-**Step 3 — Quantify the expected drop in residual sum of squares.**
+#### **Step 3 — Quantify the expected drop in residual sum of squares.**
 
 Since the model is correctly specified, $\hat\epsilon_k = M_Xy = M_X\epsilon$ ( the true signal is annihilated by $M_X$ ). Using $\tilde x_{k+1}^\top \hat y_k = 0$ (orthogonality of projections):
 
@@ -111,7 +111,7 @@ Conditioning on $X_+$, $\tilde x_{k+1}^\top\epsilon \sim N(0,\sigma^2\|\tilde x_
 **A dead feature soaks up exactly one unit of noise variance, no more, no less, in expectation.** This single
 identity is the seed of the entire F-test in Q03.
 
-**Step 4 — The residual-variance estimator $\hat\sigma^2$ stays unbiased — but loses efficiency.**
+#### **Step 4 — The residual-variance estimator $\hat\sigma^2$ stays unbiased — but loses efficiency.**
 
 $RSS_{k+1}=\|M_{X_+}\epsilon\|^2\sim\sigma^2\chi^2_{n-k-1}$, so $\hat\sigma^2_{k+1}=RSS_{k+1}/(n-k-1)$ is unbiased for $\sigma^2$, exactly as $\hat\sigma^2_k$ was. **No bias appears anywhere.** 
 
@@ -121,7 +121,7 @@ $$\text{Var}(\hat\sigma^2_{k+1}) = \frac{2\sigma^4}{n-k-1} > \frac{2\sigma^4}{n-
 
 — a strictly noisier estimate of the same true quantity.
 
-**Step 5 — Every *existing* coefficient's variance weakly increases — the VIF mechanism.**
+#### **Step 5 — Every *existing* coefficient's variance weakly increases — the VIF mechanism.**
 
 By the block-inversion (Frisch–Waugh) identity, for any regressor $x_j$ in the augmented set:
 
@@ -147,7 +147,7 @@ where $R_j^2$ is from regressing $x_j$ on every other regressor. Adding $x_{k+1}
 
 **$X^\top x_{k+1}=0$ exactly is a sufficient condition for zero damage** — it leaves $\text{Var}(\hat\beta_j)$ unchanged for *every* $j\le k$ simultaneously, because the dead feature is orthogonal to the entire existing design. (It is not narrowly necessary for any single $j$ in isolation — but generically, any nonzero correlation between $x_{k+1}$ and $X$ will strictly inflate at least one of the $k$ variances.)
 
-**Step 6 — Out-of-sample: the bias–variance decomposition flips sign on you.**
+#### **Step 6 — Out-of-sample: the bias–variance decomposition flips sign on you.**
 
 Expected out-of-sample prediction error decomposes as $\text{MSE} = \text{Bias}^2+\text{Variance}+\sigma^2$. Step 1 showed Bias² stays at (essentially) zero. Step 5 showed Variance strictly rises whenever $x_{k+1}$ is even slightly correlated with $X$, and even when orthogonal, you still pay a pure estimation-variance cost for the extra
 parameter $\hat\beta_{k+1}$ itself, whose sampling noise propagates into every future prediction:
@@ -364,7 +364,7 @@ F &= \frac{(RSS_R - RSS_U)/q}{RSS_U/(n-p_U)} \\
 \end{aligned}
 $$
 
-From **[Q02-Step3](#step-3--pythagorean-proof-that-rss_k1le-rss_k-the-geometric-version-of-q01-step2-proved-rigorously-via-the-orthogonal-direct-sum-projector-identity--not-asserted)** and **[Q02-Diagram](#q02--geometric-interpretation)**: the numerator's bracketed term is $\|\hat y_{k+1}-\hat y_k\|^2=\hat\beta_{k+1}^2\|\tilde x_{k+1}\|^2$ — the squared length of the **extra fitted vector**, living in the 1-dimensional space $\text{span}\{\tilde x_{k+1}\}$. The denominator's bracketed term is $RSS_{k+1}=\|\hat\epsilon_{k+1}\|^2$ — the squared length of the **final residual**, living in the $(n-k-1)$-dimensional orthogonal complement of $\text{col}(X_+)$. **These two subspaces are orthogonal to each other by construction** (one is exactly $\text{span}\{\tilde x_{k+1}\}$, the other is everything left over after also removing that span), so by Cochran's theorem applied to the Gaussian vector $\epsilon$, the numerator and denominator pieces are **statistically independent**.
+From **[Q02-Step3](#step-3--pythagorean-proof-that-rss_k1le-rss_k-the-geometric-version-of-q01-step2-proved-rigorously-via-the-orthogonal-direct-sum-projector-identity--not-asserted)** and **[Q02-Diagram](#-ascii-diagram--nested-subspaces--the-orthogonal-decomposition)**: the numerator's bracketed term is $\|\hat y_{k+1}-\hat y_k\|^2=\hat\beta_{k+1}^2\|\tilde x_{k+1}\|^2$ — the squared length of the **extra fitted vector**, living in the 1-dimensional space $\text{span}\{\tilde x_{k+1}\}$. The denominator's bracketed term is $RSS_{k+1}=\|\hat\epsilon_{k+1}\|^2$ — the squared length of the **final residual**, living in the $(n-k-1)$-dimensional orthogonal complement of $\text{col}(X_+)$. **These two subspaces are orthogonal to each other by construction** (one is exactly $\text{span}\{\tilde x_{k+1}\}$, the other is everything left over after also removing that span), so by Cochran's theorem applied to the Gaussian vector $\epsilon$, the numerator and denominator pieces are **statistically independent**.
 
 **Step 3 — Distribution under $H_0$.**
 
