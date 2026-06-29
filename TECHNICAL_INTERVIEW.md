@@ -1756,16 +1756,26 @@ Define the Projection Matrix (often called the "Hat Matrix" because it puts the 
 
 $$\mathbf{P}_{\mathbf{X}} = \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top$$
 
-Thus, $\hat{\mathbf{y}} = \mathbf{P}_{\mathbf{X}}\mathbf{y}$. The matrix $\mathbf{P}_{\mathbf{X}}$ is idempotent ($\mathbf{P}_{\mathbf{X}}^2 = \mathbf{P}_{\mathbf{X}}$) and symmetric.
-The vector of residuals is $\hat{\boldsymbol{\epsilon}} = \mathbf{y} - \hat{\mathbf{y}} = \mathbf{y} - \mathbf{P}_{\mathbf{X}}\mathbf{y} = (\mathbf{I} - \mathbf{P}_{\mathbf{X}})\mathbf{y}$.
+Thus:
 
-To prove the residuals are strictly orthogonal to the feature space, we check the dot product $\mathbf{X}^\top\hat{\boldsymbol{\epsilon}}$:
+$$
+\hat{\mathbf{y}} = \mathbf{P}_{\mathbf{X}}\mathbf{y}$
+$$
 
-$$\mathbf{X}^\top\hat{\boldsymbol{\epsilon}} = \mathbf{X}^\top(\mathbf{I}-\mathbf{P}_{\mathbf{X}})\mathbf{y} = (\mathbf{X}^\top - \mathbf{X}^\top\mathbf{P}_{\mathbf{X}})\mathbf{y}$$
+* The matrix $\mathbf{P}_{\mathbf{X}}$ is idempotent ( $\mathbf{P}_{\mathbf{X}}^2 = \mathbf{P}_{\mathbf{X}}$ ) and symmetric
+* The vector of residuals is $\hat{\boldsymbol{\epsilon}} = \mathbf{y} - \hat{\mathbf{y}} = \mathbf{y} - \mathbf{P}_{\mathbf{X}}\mathbf{y} = (\mathbf{I} - \mathbf{P}_{\mathbf{X}})\mathbf{y}$
 
-Let's evaluate $\mathbf{X}^\top\mathbf{P}_{\mathbf{X}}$:
+To prove the residuals are strictly orthogonal to the feature space, we check the dot product $\mathbf{X}^\top\hat{\boldsymbol{\epsilon}}$ :
 
-$$\mathbf{X}^\top\mathbf{P}_{\mathbf{X}} = \mathbf{X}^\top[\mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top] = [\mathbf{X}^\top\mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}]\mathbf{X}^\top = \mathbf{I}\mathbf{X}^\top = \mathbf{X}^\top$$
+$$
+\mathbf{X}^\top\hat{\boldsymbol{\epsilon}} = \mathbf{X}^\top(\mathbf{I}-\mathbf{P}_{\mathbf{X}})\mathbf{y} = (\mathbf{X}^\top - \mathbf{X}^\top\mathbf{P}_{\mathbf{X}})\mathbf{y}
+$$
+
+Let's evaluate $\mathbf{X}^\top\mathbf{P}_{\mathbf{X}}$ :
+
+$$
+\mathbf{X}^\top\mathbf{P}_{\mathbf{X}} = \mathbf{X}^\top[\mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top] = [\mathbf{X}^\top\mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}]\mathbf{X}^\top = \mathbf{I}\mathbf{X}^\top = \mathbf{X}^\top
+$$
 
 Substitute that back in:
 
