@@ -815,7 +815,7 @@ $$
 \text{Numerator (signal-return covariance)} &= \mathbb{E}\!\left[(\mathbf{F}_t^\top\mathbf{w})\,r_t\right] \\
 &= \mathbf{w}^\top \mathbb{E}[\mathbf{F}_t r_t] \\
 &= \mathbf{w}^\top\boldsymbol{\mu} \\
-\boldsymbol{\mu} \equiv \frac{\mathbf{F}^\top\mathbf{r}}{T}
+\boldsymbol{\mu} &\equiv \frac{\mathbf{F}^\top\mathbf{r}}{T}
 \end{aligned}
 $$
 
@@ -823,7 +823,7 @@ $$
 \begin{aligned}
 \text{Denominator (signal variance)} &= \text{Var}(\mathbf{F}_t^\top\mathbf{w}) \\
 &= \mathbf{w}^\top \mathbf{\Sigma}\mathbf{w} \\
-\mathbf{\Sigma} \equiv \frac{\mathbf{F}^\top\mathbf{F}}{T}
+\mathbf{\Sigma} &\equiv \frac{\mathbf{F}^\top\mathbf{F}}{T}
 \end{aligned}
 $$
 
