@@ -73,7 +73,7 @@ Contrast this with the *reverse* mistake (omitting a relevant regressor $x_{k+1}
 $$
 \begin{flalign}
 && \mathbb{E}[\hat\beta^{short}] &= \beta + \delta \cdot \beta_{k+1} & \\
-&& \delta &= (X^\top X)^{-1} \cot X^\top \cdot x_{k+1} &
+&& \delta &= (X^\top X)^{-1} \cdot X^\top \cdot x_{k+1} &
 \end{flalign}
 $$
 
