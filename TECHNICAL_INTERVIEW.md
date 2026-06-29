@@ -1637,86 +1637,176 @@ Net-of-cost Sharpe      > 0.5           Primary criterion for live promotion
 ## Q11 · Derive Linear Regression from First Principles in Matrix Form
 
 **Open with the intuition (15 seconds):**
-> "Linear regression is the foundation of every factor model and signal validation. OLS
-> gives the Best Linear Unbiased Estimator (BLUE) under five Gauss-Markov assumptions.
-> Knowing the derivation from scratch — not just the formula — is what separates a quant
-> researcher from a data scientist who uses it as a black box."
+
+> "Linear regression is the foundation of every factor model and signal validation. OLS gives the Best Linear Unbiased Estimator (BLUE) under the Gauss-Markov assumptions. Knowing the derivation from scratch—not just reciting the final normal equations—is what separates a mathematically rigorous quant researcher from a practitioner who treats algorithms as a black box."
 
 ---
 
-### 🧮 Full OLS Derivation — Every Step
+### 🧮 Full OLS Derivation — Unpacking Every Step
 
-**Setup:** $T$ observations, $K$ features. The data-generating process:
+**Setup:** We have $T$ observations and $K$ features. The assumed data-generating process is linear:
 
 $$\mathbf{y} = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\epsilon}, \quad \boldsymbol{\epsilon} \sim \mathcal{N}(\mathbf{0}, \sigma^2 \mathbf{I}_T)$$
 
-where $\mathbf{y} \in \mathbb{R}^T$, $\mathbf{X} \in \mathbb{R}^{T \times K}$ (first column is all-ones intercept),
-$\boldsymbol{\beta} \in \mathbb{R}^K$.
+To be absolutely precise with dimensions:
 
-**Step 1 — Define the loss function (Residual Sum of Squares):**
+* $\mathbf{y} \in \mathbb{R}^{T \times 1}$ is the column vector of target variables.
+* $\mathbf{X} \in \mathbb{R}^{T \times K}$ is the design matrix (the first column is typically all ones for the intercept).
+* $\boldsymbol{\beta} \in \mathbb{R}^{K \times 1}$ is the column vector of unknown parameters we wish to estimate.
+* $\boldsymbol{\epsilon} \in \mathbb{R}^{T \times 1}$ is the column vector of random error terms.
+* $\mathbf{I}_T$ is the $T \times T$ identity matrix.
 
-$$\mathcal{L}(\boldsymbol{\beta}) = \|\mathbf{y} - \mathbf{X}\boldsymbol{\beta}\|^2 = (\mathbf{y} - \mathbf{X}\boldsymbol{\beta})^\top(\mathbf{y} - \mathbf{X}\boldsymbol{\beta})$$
+**Step 1 — Define the Objective Function (Residual Sum of Squares):**
+We want to find the parameter vector $\boldsymbol{\beta}$ that minimizes the sum of the squared residuals. A residual is the difference between the observed value and the predicted value: $\boldsymbol{\epsilon} = \mathbf{y} - \mathbf{X}\boldsymbol{\beta}$.
 
-**Step 2 — Expand the quadratic form:**
+The sum of squared residuals is the dot product of the residual vector with itself, also known as the squared $L_2$ norm. Let $\mathcal{L}(\boldsymbol{\beta})$ be our loss function:
+
+$$\mathcal{L}(\boldsymbol{\beta}) = \sum_{i=1}^{T} \epsilon_i^2 = \boldsymbol{\epsilon}^\top\boldsymbol{\epsilon}$$
+
+Substitute the definition of $\boldsymbol{\epsilon}$:
+
+$$\mathcal{L}(\boldsymbol{\beta}) = (\mathbf{y} - \mathbf{X}\boldsymbol{\beta})^\top(\mathbf{y} - \mathbf{X}\boldsymbol{\beta})$$
+
+**Step 2 — Expand the Quadratic Form using Matrix Algebra:**
+We apply the transpose distribution rule $(\mathbf{A} - \mathbf{B})^\top = \mathbf{A}^\top - \mathbf{B}^\top$:
+
+$$\mathcal{L}(\boldsymbol{\beta}) = (\mathbf{y}^\top - (\mathbf{X}\boldsymbol{\beta})^\top)(\mathbf{y} - \mathbf{X}\boldsymbol{\beta})$$
+
+Now, apply the product transpose rule $(\mathbf{A}\mathbf{B})^\top = \mathbf{B}^\top\mathbf{A}^\top$ to the inner term:
+
+$$\mathcal{L}(\boldsymbol{\beta}) = (\mathbf{y}^\top - \boldsymbol{\beta}^\top\mathbf{X}^\top)(\mathbf{y} - \mathbf{X}\boldsymbol{\beta})$$
+
+Next, we expand this exactly as we would using FOIL (First, Outer, Inner, Last) in basic algebra, respecting matrix multiplication order:
+
+$$\mathcal{L}(\boldsymbol{\beta}) = \mathbf{y}^\top\mathbf{y} - \mathbf{y}^\top\mathbf{X}\boldsymbol{\beta} - \boldsymbol{\beta}^\top\mathbf{X}^\top\mathbf{y} + \boldsymbol{\beta}^\top\mathbf{X}^\top\mathbf{X}\boldsymbol{\beta}$$
+
+**Crucial simplification:** Look at the middle two terms.
+The dimensions of $\mathbf{y}^\top\mathbf{X}\boldsymbol{\beta}$ are $(1 \times T) \times (T \times K) \times (K \times 1) = 1 \times 1$.
+Because it is a scalar, it is equal to its own transpose. Let's take the transpose of the first middle term to prove it matches the second:
+
+$$(\mathbf{y}^\top\mathbf{X}\boldsymbol{\beta})^\top = \boldsymbol{\beta}^\top\mathbf{X}^\top(\mathbf{y}^\top)^\top = \boldsymbol{\beta}^\top\mathbf{X}^\top\mathbf{y}$$
+
+Since they are identical scalars, we can combine them:
 
 $$\mathcal{L}(\boldsymbol{\beta}) = \mathbf{y}^\top\mathbf{y} - 2\boldsymbol{\beta}^\top\mathbf{X}^\top\mathbf{y} + \boldsymbol{\beta}^\top\mathbf{X}^\top\mathbf{X}\boldsymbol{\beta}$$
 
-**(Note: $\mathbf{y}^\top\mathbf{X}\boldsymbol{\beta} = \boldsymbol{\beta}^\top\mathbf{X}^\top\mathbf{y}$ since it's a scalar.)**
+**Step 3 — Take the Matrix Gradient from First Principles:**
+To find the minimum, we must take the derivative of $\mathcal{L}(\boldsymbol{\beta})$ with respect to the vector $\boldsymbol{\beta}$ and set it to zero. We analyze this term by term.
 
-**Step 3 — Take the matrix gradient and set to zero:**
+1. **First term ($\mathbf{y}^\top\mathbf{y}$):** There is no $\boldsymbol{\beta}$ here. The derivative of a constant is $\mathbf{0}$.
+2. **Second term ($- 2\boldsymbol{\beta}^\top\mathbf{X}^\top\mathbf{y}$):** Let $\mathbf{c} = \mathbf{X}^\top\mathbf{y}$. This is a constant column vector. The term becomes $-2\boldsymbol{\beta}^\top\mathbf{c}$, which expands to $-2 \sum_{i=1}^K \beta_i c_i$. The partial derivative with respect to any individual $\beta_j$ is simply $-2 c_j$. Stacking these partial derivatives back into a vector yields $-2\mathbf{c}$. Therefore:
+
+$$\frac{\partial}{\partial \boldsymbol{\beta}} (-2\boldsymbol{\beta}^\top\mathbf{X}^\top\mathbf{y}) = -2\mathbf{X}^\top\mathbf{y}$$
+
+
+3. **Third term ($\boldsymbol{\beta}^\top\mathbf{X}^\top\mathbf{X}\boldsymbol{\beta}$):** Let $\mathbf{A} = \mathbf{X}^\top\mathbf{X}$. Note that $\mathbf{A}$ is a symmetric matrix because $\mathbf{A}^\top = (\mathbf{X}^\top\mathbf{X})^\top = \mathbf{X}^\top\mathbf{X} = \mathbf{A}$. The expression is a quadratic form: $\boldsymbol{\beta}^\top\mathbf{A}\boldsymbol{\beta} = \sum_i \sum_j A_{ij} \beta_i \beta_j$. Taking the partial derivative with respect to $\beta_k$ involves terms where $i=k$ and terms where $j=k$, resulting in $\sum_j A_{kj}\beta_j + \sum_i A_{ik}\beta_i$. Because $A$ is symmetric ($A_{ik} = A_{ki}$), this is $2 \sum_j A_{kj}\beta_j$, which is exactly the $k$-th element of $2\mathbf{A}\boldsymbol{\beta}$. Therefore:
+
+$$\frac{\partial}{\partial \boldsymbol{\beta}} (\boldsymbol{\beta}^\top\mathbf{X}^\top\mathbf{X}\boldsymbol{\beta}) = 2\mathbf{X}^\top\mathbf{X}\boldsymbol{\beta}$$
+
+
+
+Combining these gives the gradient vector:
 
 $$\frac{\partial \mathcal{L}}{\partial \boldsymbol{\beta}} = -2\mathbf{X}^\top\mathbf{y} + 2\mathbf{X}^\top\mathbf{X}\boldsymbol{\beta} = \mathbf{0}$$
 
-**(Using matrix calculus identities: $\partial(\mathbf{a}^\top\boldsymbol{\beta})/\partial\boldsymbol{\beta} = \mathbf{a}$ and $\partial(\boldsymbol{\beta}^\top\mathbf{A}\boldsymbol{\beta})/\partial\boldsymbol{\beta} = 2\mathbf{A}\boldsymbol{\beta}$ for symmetric $\mathbf{A}$.)**
-
 **Step 4 — Rearrange to the Normal Equations:**
+Add $2\mathbf{X}^\top\mathbf{y}$ to both sides and divide by 2:
 
 $$\mathbf{X}^\top\mathbf{X}\boldsymbol{\beta} = \mathbf{X}^\top\mathbf{y}$$
 
-**Step 5 — Solve (when $\mathbf{X}^\top\mathbf{X}$ is full rank, i.e., columns of $\mathbf{X}$ are linearly independent):**
+These are the fundamental **Normal Equations**.
 
-|     |
-| :-- |
+**Step 5 — Solve for $\hat{\boldsymbol{\beta}}$ (The Inverse Matrix Condition):**
+To isolate $\boldsymbol{\beta}$, we must left-multiply both sides by the inverse of $(\mathbf{X}^\top\mathbf{X})$.
+*Why are we allowed to do this?* $(\mathbf{X}^\top\mathbf{X})$ is a $K \times K$ Gram matrix. If the columns of $\mathbf{X}$ are linearly independent (meaning no feature is a perfect linear combination of the others—i.e., no perfect multicollinearity), then $\mathbf{X}$ has full column rank.
+Consequently, for any non-zero vector $\mathbf{v}$, $\|\mathbf{X}\mathbf{v}\|^2 > 0$. Therefore, $\mathbf{v}^\top(\mathbf{X}^\top\mathbf{X})\mathbf{v} > 0$, making the matrix **positive definite**. All positive definite matrices are strictly invertible.
+
+Left-multiplying by $(\mathbf{X}^\top\mathbf{X})^{-1}$:
+
+|  |
+| --- |
 | $`\hat{\boldsymbol{\beta}}_{\text{OLS}} = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}`$ |
 
-**Step 6 — Verify it is a minimum, not a maximum or saddle.** The Hessian:
+**Step 6 — Verify it is a Global Minimum (The Hessian):**
+We found a critical point, but is it a minimum? In multivariable calculus, we look at the second derivative matrix (the Hessian, $\mathbf{H}$). We differentiate the gradient $2\mathbf{X}^\top\mathbf{X}\boldsymbol{\beta} - 2\mathbf{X}^\top\mathbf{y}$ with respect to $\boldsymbol{\beta}$.
+The derivative of a linear mapping $\mathbf{M}\boldsymbol{\beta}$ is simply the matrix $\mathbf{M}$.
 
 $$\mathbf{H} = \frac{\partial^2 \mathcal{L}}{\partial \boldsymbol{\beta} \partial \boldsymbol{\beta}^\top} = 2\mathbf{X}^\top\mathbf{X}$$
 
-$\mathbf{X}^\top\mathbf{X}$ is positive semi-definite (since $\mathbf{v}^\top\mathbf{X}^\top\mathbf{X}\mathbf{v} = \|\mathbf{X}\mathbf{v}\|^2 \geq 0$).
-With full rank, it is positive definite, so $\mathbf{H} \succ 0$ — confirming a global minimum.
+As proven in Step 5, because $\mathbf{X}$ is full rank, $2\mathbf{X}^\top\mathbf{X}$ is a positive definite matrix ($\mathbf{H} \succ 0$). A positive definite Hessian mathematically guarantees that the critical point we found is a strictly **global minimum**.
 
-**Step 7 — Geometric interpretation.** Define the hat matrix (projection matrix):
+**Step 7 — Geometric Interpretation & The Projection Matrix:**
+What is OLS doing physically? It is projecting the target vector $\mathbf{y}$ onto the linear subspace spanned by the columns of $\mathbf{X}$.
+Substitute our estimate $\hat{\boldsymbol{\beta}}$ back into the equation to find the predicted values $\hat{\mathbf{y}}$:
 
-$$\mathbf{H} = \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top$$
+$$\hat{\mathbf{y}} = \mathbf{X}\hat{\boldsymbol{\beta}} = \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{y}$$
 
-Then $\hat{\mathbf{y}} = \mathbf{H}\mathbf{y}$ is the orthogonal projection of $\mathbf{y}$ onto
-the column space of $\mathbf{X}$. The residual $\hat{\boldsymbol{\epsilon}} = (\mathbf{I} - \mathbf{H})\mathbf{y}$
-is orthogonal to every column of $\mathbf{X}$:
+Define the Projection Matrix (often called the "Hat Matrix" because it puts the hat on $\mathbf{y}$):
 
-$$\mathbf{X}^\top\hat{\boldsymbol{\epsilon}} = \mathbf{X}^\top(\mathbf{I}-\mathbf{H})\mathbf{y} = \mathbf{0}$$
+$$\mathbf{P}_{\mathbf{X}} = \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top$$
 
-**Step 8 — Variance of the OLS estimator:**
+Thus, $\hat{\mathbf{y}} = \mathbf{P}_{\mathbf{X}}\mathbf{y}$. The matrix $\mathbf{P}_{\mathbf{X}}$ is idempotent ($\mathbf{P}_{\mathbf{X}}^2 = \mathbf{P}_{\mathbf{X}}$) and symmetric.
+The vector of residuals is $\hat{\boldsymbol{\epsilon}} = \mathbf{y} - \hat{\mathbf{y}} = \mathbf{y} - \mathbf{P}_{\mathbf{X}}\mathbf{y} = (\mathbf{I} - \mathbf{P}_{\mathbf{X}})\mathbf{y}$.
+
+To prove the residuals are strictly orthogonal to the feature space, we check the dot product $\mathbf{X}^\top\hat{\boldsymbol{\epsilon}}$:
+
+$$\mathbf{X}^\top\hat{\boldsymbol{\epsilon}} = \mathbf{X}^\top(\mathbf{I}-\mathbf{P}_{\mathbf{X}})\mathbf{y} = (\mathbf{X}^\top - \mathbf{X}^\top\mathbf{P}_{\mathbf{X}})\mathbf{y}$$
+
+Let's evaluate $\mathbf{X}^\top\mathbf{P}_{\mathbf{X}}$:
+
+$$\mathbf{X}^\top\mathbf{P}_{\mathbf{X}} = \mathbf{X}^\top[\mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top] = [\mathbf{X}^\top\mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}]\mathbf{X}^\top = \mathbf{I}\mathbf{X}^\top = \mathbf{X}^\top$$
+
+Substitute that back in:
+
+$$(\mathbf{X}^\top - \mathbf{X}^\top)\mathbf{y} = \mathbf{0} \cdot \mathbf{y} = \mathbf{0}$$
+
+This proves the geometric reality of OLS: the error vector is perfectly perpendicular to the hyperplane of our features.
+
+**Step 8 — Derive Unbiasedness and Variance of the Estimator:**
+Is our estimator accurate? Let's check its expectation. Substitute the true data-generating process $\mathbf{y} = \mathbf{X}\boldsymbol{\beta} + \boldsymbol{\epsilon}$ into our formula:
+
+$$\hat{\boldsymbol{\beta}} = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top(\mathbf{X}\boldsymbol{\beta} + \boldsymbol{\epsilon})$$
+
+$$\hat{\boldsymbol{\beta}} = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\mathbf{X}\boldsymbol{\beta} + (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\boldsymbol{\epsilon}$$
+
+$$\hat{\boldsymbol{\beta}} = \mathbf{I}\boldsymbol{\beta} + (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\boldsymbol{\epsilon}$$
+
+Taking the expectation (noting $\mathbf{X}$ is assumed fixed/non-stochastic and $E[\boldsymbol{\epsilon}] = \mathbf{0}$):
+
+$$E[\hat{\boldsymbol{\beta}}] = \boldsymbol{\beta} + (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top E[\boldsymbol{\epsilon}] = \boldsymbol{\beta} + \mathbf{0} = \boldsymbol{\beta}$$
+
+
+*This proves the estimator is Unbiased.*
+
+Now, derive the Variance. Since $\boldsymbol{\beta}$ is a constant vector, the variance relies entirely on the error term:
+
+$$\text{Var}(\hat{\boldsymbol{\beta}}) = \text{Var}\left((\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top\boldsymbol{\epsilon}\right)$$
+
+We use the matrix variance property $\text{Var}(\mathbf{M}\mathbf{z}) = \mathbf{M}\text{Var}(\mathbf{z})\mathbf{M}^\top$. Let $\mathbf{M} = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top$:
+
+$$\text{Var}(\hat{\boldsymbol{\beta}}) = [(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top] \cdot \text{Var}(\boldsymbol{\epsilon}) \cdot [(\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top]^\top$$
+
+We know from our setup that $\text{Var}(\boldsymbol{\epsilon}) = \sigma^2 \mathbf{I}_T$. Also, apply the transpose rule $(\mathbf{A}\mathbf{B})^\top = \mathbf{B}^\top\mathbf{A}^\top$. Because $(\mathbf{X}^\top\mathbf{X})$ is symmetric, its inverse is symmetric:
+
+$$\text{Var}(\hat{\boldsymbol{\beta}}) = (\mathbf{X}^\top\mathbf{X})^{-1}\mathbf{X}^\top (\sigma^2 \mathbf{I}_T) \mathbf{X}(\mathbf{X}^\top\mathbf{X})^{-1}$$
+
+Pull the scalar $\sigma^2$ to the front and multiply the matrices in the middle:
+
+$$\text{Var}(\hat{\boldsymbol{\beta}}) = \sigma^2 (\mathbf{X}^\top\mathbf{X})^{-1} (\mathbf{X}^\top\mathbf{X}) (\mathbf{X}^\top\mathbf{X})^{-1}$$
+
+The middle terms $(\mathbf{X}^\top\mathbf{X})(\mathbf{X}^\top\mathbf{X})^{-1}$ cancel to the identity matrix $\mathbf{I}$, leaving the final theoretical variance:
 
 $$\text{Var}(\hat{\boldsymbol{\beta}}) = \sigma^2 (\mathbf{X}^\top\mathbf{X})^{-1}$$
 
-**Estimated variance** ( plug in $\hat{\sigma}^2 = \|\hat{\boldsymbol{\epsilon}}\|^2 / (T-K)$ ):
+**Estimated variance:** Because the true population variance $\sigma^2$ is unknown, we estimate it using the sum of squared residuals divided by the degrees of freedom (Bessel's correction for $K$ features): $\hat{\sigma}^2 = \|\hat{\boldsymbol{\epsilon}}\|^2 / (T-K)$.
 
 $$\widehat{\text{Var}}(\hat{\boldsymbol{\beta}}) = \hat{\sigma}^2 (\mathbf{X}^\top\mathbf{X})^{-1}$$
 
-The standard error of:
+The standard error of any specific coefficient $\hat{\beta}_j$ is the square root of the $j$-th diagonal element of this covariance matrix:
 
-$$
-\hat{\beta}_j
-$$
+$$\text{SE}(\hat{\beta}_j) = \sqrt{\hat{\sigma}^2 [(\mathbf{X}^\top\mathbf{X})^{-1}]_{jj}}$$
 
-is:
-
-$$
-\sqrt{\hat{\sigma}^2 [(\mathbf{X}^\top\mathbf{X})^{-1}]_{jj}}
-$$
-
-and the $t$-statistic is $\hat{\beta}_j / \text{SE}(\hat{\beta}_j)$ .
+This allows us to calculate the $t$-statistic as $\hat{\beta}_j / \text{SE}(\hat{\beta}_j)$ for hypothesis testing.
 
 ---
 
