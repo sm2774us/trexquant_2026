@@ -245,10 +245,14 @@ $$
 \end{flalign}
 $$
 
-So $\hat y_{k+1}-\hat y_k=\hat\beta_{k+1} \cdot \tilde x_{k+1}$ **exactly** (this is also exactly the FWL coefficient from Step 4 below), and since $\tilde x_{k+1}\perp\text{col}(X)\ni\hat y_k$, this increment is orthogonal to $\hat y_k$ by construction, not approximately. Combined with $\hat\epsilon_{k+1}\perp\text{col}(X_+)\supseteq\{\hat y_k, \, \hat y_{k+1}-\hat y_k\}$, the Pythagorean theorem on the right triangle $y,\hat y_k,\hat y_{k+1}$ gives:
+So $\hat y_{k+1}-\hat y_k=\hat\beta_{k+1} \cdot \tilde x_{k+1}$ **exactly** (this is also exactly the FWL coefficient from Step 4 below), and since $\tilde x_{k+1}\perp\text{col}(X)\ni\hat y_k$, this increment is orthogonal to $\hat y_k$ by construction, not approximately. Combined with $\hat\epsilon_{k+1} \perp \text{col}(X_+) \supseteq \{\hat y_k,\hat y_{k+1}-\hat y_k\}$ , the Pythagorean theorem on the right triangle $y,\hat y_k,\hat y_{k+1}$ gives:
 
 $$
-\|y-\hat y_k\|^2 = \|y-\hat y_{k+1}\|^2 + \|\hat y_{k+1}-\hat y_k\|^2 \quad\Longrightarrow\quad RSS_k = RSS_{k+1} + \underbrace{\hat\beta_{k+1}^2 \cdot \|\tilde x_{k+1}\|^2}_{\ge 0}
+\begin{aligned}
+\|y-\hat y_k\|^2 &= \|y-\hat y_{k+1}\|^2 + \|\hat y_{k+1}-\hat y_k\|^2 \\
+\quad\Longrightarrow\quad \\
+RSS_k &= RSS_{k+1} + \underbrace{\hat\beta_{k+1}^2 \cdot \|\tilde x_{k+1}\|^2}_{\ge 0}
+\end{aligned}
 $$
 
 This is a **purely geometric** re-derivation of **[Q01-Step3](#q01--you-add-a-feature-you-already-know-doesnt-work--what-happens)** — moving to a bigger subspace can only shorten the distance to $y$ (or leave it unchanged), it can never lengthen it.
