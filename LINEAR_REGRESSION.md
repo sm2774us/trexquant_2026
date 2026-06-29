@@ -136,7 +136,11 @@ $$
 Equivalently, in VIF language — these are two equal ways of writing the *same* quantity, not one multiplied by the other:
 
 $$
-\text{Var}(\hat\beta_j)=\frac{\sigma^2}{SST_j(1-R_j^2)} \;=\; \frac{\sigma^2}{SST_j}\cdot\text{VIF}_j, \qquad \text{VIF}_j=\frac{1}{1-R_j^2}
+\begin{aligned}
+\text{Var}(\hat\beta_j) &= \frac{\sigma^2}{SST_j(1-R_j^2)} \\
+&= \frac{\sigma^2}{SST_j} \cdot \text{VIF}_j \\
+\text{VIF}_j &= \frac{1}{1-R_j^2}
+\end{aligned}
 $$
 
 where $R_j^2$ is from regressing $x_j$ on every other regressor. Adding $x_{k+1}$ weakly raises $R_j^2$ for every existing $j$ ⇒ VIF rises ⇒ standard errors widen, $t$-stats shrink, confidence intervals balloon.
@@ -149,7 +153,10 @@ Expected out-of-sample prediction error decomposes as $\text{MSE} = \text{Bias}^
 parameter $\hat\beta_{k+1}$ itself, whose sampling noise propagates into every future prediction:
 
 $$
-\widehat{y}_{new} = x_{new}^\top\hat\beta + x_{k+1,new}\hat\beta_{k+1}, \qquad \text{Var add-on} = x_{k+1,new}^2\,\text{Var}(\hat\beta_{k+1})
+\begin{aligned}
+\widehat{y}_{new} &= x_{new}^\top\hat\beta + x_{k+1,new}\hat\beta_{k+1} \\
+\text{Var add-on} &= x_{k+1,new}^2\,\text{Var}(\hat\beta_{k+1})
+\end{aligned}
 $$
 
 Net effect: **in-sample $R^2$ ↑ (mechanically), out-of-sample $R^2$ ↓ (in expectation)** — the textbook signature of overfitting, derived here without invoking the word "overfitting" once.
