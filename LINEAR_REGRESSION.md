@@ -94,12 +94,12 @@ With continuous data this is a probability-zero event — **$R^2$ will go up eve
 Since the model is correctly specified, $\hat\epsilon_k = M_Xy = M_X\epsilon$ ( the true signal is annihilated by $M_X$ ). Using $\tilde x_{k+1}^\top \hat y_k = 0$ (orthogonality of projections):
 
 $$
-\begin{flalign}
-&& \hat\beta_{k+1} &= \frac{\tilde x_{k+1}^\top y}{\tilde x_{k+1}^\top & \\
-&& \tilde x_{k+1}} &= \frac{\tilde x_{k+1}^\top \epsilon}{\|\tilde x_{k+1}\|^2} & \\
-&& RSS_k-RSS_{k+1} &= \hat\beta_{k+1}^2 & \\
-&& \|\tilde x_{k+1}\|^2 &= \frac{(\tilde x_{k+1}^\top \epsilon)^2}{\|\tilde x_{k+1}\|^2} &
-\end{flalign}
+\begin{aligned}
+\hat\beta_{k+1} &= \frac{\tilde x_{k+1}^\top y}{\tilde x_{k+1}^\top \\
+\tilde x_{k+1}} &= \frac{\tilde x_{k+1}^\top \epsilon}{\|\tilde x_{k+1}\|^2} \\
+RSS_k-RSS_{k+1} &= \hat\beta_{k+1}^2 \\
+\|\tilde x_{k+1}\|^2 &= \frac{(\tilde x_{k+1}^\top \epsilon)^2}{\|\tilde x_{k+1}\|^2}
+\end{aligned}
 $$
 
 Conditioning on $X_+$, $\tilde x_{k+1}^\top\epsilon \sim N(0,\sigma^2\|\tilde x_{k+1}\|^2)$, so the quantity above is $\sigma^2\chi^2_1$, hence:
