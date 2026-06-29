@@ -1768,13 +1768,13 @@ $$
 \mathbf{P}_{\mathbf{X}}
 $$ 
 
-is idempotent - 
+is idempotent: 
 
 $$
 \mathbf{P}_{\mathbf{X}}^2 = \mathbf{P}_{\mathbf{X}}
 $$
 
-- and symmetric.
+and symmetric.
 
 The vector of residuals is:
 
