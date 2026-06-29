@@ -847,7 +847,7 @@ $$\frac{\partial \mathcal{L}}{\partial \mathbf{w}} = \boldsymbol{\mu} - \eta\,\m
 
 |     |
 | :-- |
-| $`\mathbf{w}^{\*} = \mathbf{\Sigma}^{-1}\boldsymbol{\mu}`$ |
+| $`\mathbf{w}^{*} = \mathbf{\Sigma}^{-1}\boldsymbol{\mu}`$ |
 
 **Step 7 — Key identity: this is exactly the OLS regression coefficient of $\mathbf{r}$ on $\mathbf{F}$.**
 Since $\boldsymbol{\mu} = \mathbf{F}^\top\mathbf{r}/T$ and $\mathbf{\Sigma}=\mathbf{F}^\top\mathbf{F}/T$,
