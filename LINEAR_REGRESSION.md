@@ -241,7 +241,7 @@ $$
 && P_{X_+} &= P_X + \frac{\tilde x_{k+1}\tilde x_{k+1}^\top}{\|\tilde x_{k+1}\|^2} & \\
 && \quad\Longrightarrow\quad & \\
 && \hat{y_{k+1}} &= P_{X_+}y & \\
-&& &= \hat{y_k} + \underbrace{\frac{\tilde x_{k+1}^\top y}{\|\tilde x_{k+1}\|^2} \, \tilde x_{k+1}}_{=\;\hat\beta_{k+1}\tilde x_{k+1}} &
+&& &= \hat{y_k} + \underbrace{\frac{\tilde x_{k+1}^\top y}{\|\tilde x_{k+1}\|^2} \, \tilde x_{k+1}}_{= \hat\beta_{k+1}\tilde x_{k+1}} &
 \end{flalign}
 $$
 
